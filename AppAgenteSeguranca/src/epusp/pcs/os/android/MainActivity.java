@@ -3,6 +3,7 @@ package epusp.pcs.os.android;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -22,6 +27,10 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.json.gson.GsonFactory;
 
@@ -34,7 +43,19 @@ GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener {
 	
 	FragmentManager fragmentManager = getFragmentManager();
-    DetailsListFragment detailsListFragment = (DetailsListFragment) fragmentManager.findFragmentById(R.id.detailsListFragment);
+    //DetailsListFragment detailsListFragment = (DetailsListFragment) fragmentManager.findFragmentById(R.id.detailsListFragment);
+	
+	private static final String MAP_FRAGMENT_TAG = "map";
+	private static final String DETAILSLIST_FRAGMENT_TAG = "detailsList";
+	
+	FrameLayout detailsFrameLayout;
+	FrameLayout mapFrameLayout;
+	
+	DetailsListFragment detailsListFragment = new DetailsListFragment();
+	MapFragment mapFragment = new MapFragment();
+
+    private GoogleMap googleMap;
+    Position myPosition = new Position();
     
 	private LocationRequest mLocationRequest;
 	private LocationClient mLocationClient;
@@ -56,7 +77,17 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		detailsFrameLayout = (FrameLayout)findViewById(R.id.detailsListContainer);
+		mapFrameLayout = (FrameLayout)findViewById(R.id.mapContainer);
 		
+		LinearLayout.LayoutParams mapLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1f);  
+	    mapFrameLayout.setLayoutParams(mapLayoutParams); 
+	    mapFrameLayout.setVisibility(View.VISIBLE);
+	   
+	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+	    fragmentTransaction.add(R.id.mapContainer, mapFragment, MAP_FRAGMENT_TAG);
+	    fragmentTransaction.commit();
+        
 		// Create a new global location parameters object
         mLocationRequest = LocationRequest.create();
 
@@ -187,6 +218,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
                 try{
                     // set TextView(s) 
                     mCurrentLocation.getLatitude();
+                    onUpdate("Veículo");
                 }catch(NullPointerException npe){
                      
                     Toast.makeText(this, "Failed to Connect", Toast.LENGTH_SHORT).show();
@@ -285,19 +317,45 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	
 			currentLocation.getLatitude();
 			currentLocation.getLongitude();
-	
-			Position position = new Position();
-			position.setLatitude(currentLocation.getLatitude());
-			position.setLongitude(currentLocation.getLongitude());
+			
+			myPosition.setLatitude(currentLocation.getLatitude());
+			myPosition.setLongitude(currentLocation.getLongitude());
 			//position.setLatitude(33.80653802509606);//currentLocation.getLatitude());
 			//position.setLongitude(-84.15252685546875);//currentLocation.getLongitude());
 	
-			new updatePositionAndVerifyStatus(this, "PCS-0505", position).execute();
+			new updatePositionAndVerifyStatus(this, "TAG001", myPosition).execute();
         }
+	}
+	
+	private void addFragments(EmergencyCall emCall) {
+		LinearLayout.LayoutParams detailsLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0.7f);  
+	    detailsFrameLayout.setLayoutParams(detailsLayoutParams); 
+	    detailsFrameLayout.setVisibility(View.VISIBLE);
+	    
+	    LinearLayout.LayoutParams mapLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0.3f);  
+	    mapFrameLayout.setLayoutParams(mapLayoutParams); 
+	    mapFrameLayout.setVisibility(View.VISIBLE);
+	    
+	    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+	    fragmentTransaction.add(R.id.detailsListContainer, detailsListFragment, DETAILSLIST_FRAGMENT_TAG);
+	    fragmentTransaction.commit();
+	    
+		if (detailsListFragment != null) {
+			detailsListFragment.text = emCall.getLastVictimPosition().getLatitude().toString();
+            detailsListFragment.updateDetail(emCall);
+        }
+		
+		LatLng victimPosition = new LatLng(emCall.getLastVictimPosition().getLatitude(), emCall.getLastVictimPosition().getLongitude());
+		LatLng currentPosition = new LatLng(myPosition.getLatitude(), myPosition.getLongitude());
+		
+		if (mapFragment != null) {
+		    googleMap = mapFragment.getMap();
+		    googleMap.addMarker(new MarkerOptions().position(victimPosition).title("Vítima"));
+		}
 	}
 
 	public void ackEmergencyCall() {
-		new AckVehicleOnCallCallAsyncTask(this, "PCS-0505").execute();
+		new AckVehicleOnCallCallAsyncTask(this, "TAG001").execute();
 	}
 
 	private class updatePositionAndVerifyStatus extends AsyncTask<Void, Void, EmergencyCall>{
@@ -336,10 +394,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		protected void onPostExecute(EmergencyCall emCall) {
 			//Clear the progress dialog and the fields
 			pd.dismiss();
-			if(emCall != null) {
-				if (detailsListFragment != null) {
-		            detailsListFragment.updateDetail(emCall);
-		        }
+			if(emCall != null) {			    
+			    addFragments(emCall);
 				//Veículo deve atender chamada -> Chama serviço para acknowledgment
 				ackEmergencyCall();
 			}
@@ -392,7 +448,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
      * to Location Services
      */
     private void startPeriodicUpdates() {
-
         mLocationClient.requestLocationUpdates(mLocationRequest, this);
     }
     
