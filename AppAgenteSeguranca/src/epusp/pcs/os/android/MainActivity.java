@@ -1,5 +1,6 @@
 package epusp.pcs.os.android;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.FragmentManager;
@@ -14,10 +15,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -117,6 +125,50 @@ GooglePlayServicesClient.OnConnectionFailedListener {
          */
         mLocationClient = new LocationClient(this, this, this);
 	}
+	/******************************************************************/
+	/*Menu*/
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    // Inflate the menu items for use in the action bar
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.main_actions, menu);
+	    return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle presses on the action bar items
+	    switch (item.getItemId()) {
+	        case R.id.action_monitor:
+	            openMonitor();
+	            return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	public void openMonitor() {
+		// custom dialog
+		final Dialog dialog = new Dialog(this);
+		dialog.setContentView(R.layout.monitor_dialog);
+		dialog.setTitle("Monitor information");
+ 
+		// set the custom dialog components - text, image and button
+		TextView text = (TextView) dialog.findViewById(R.id.text);
+		text.setText("Monitor details");
+		ImageView image = (ImageView) dialog.findViewById(R.id.image);
+		image.setImageResource(R.drawable.ic_launcher);
+		Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+		// if button is clicked, close the custom dialog
+		dialogButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		dialog.show();
+	}
+	
+	/******************************************************************/
 
     /*
      * Called when the Activity is restarted, even before it becomes visible.
@@ -396,6 +448,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			pd.dismiss();
 			if(emCall != null) {			    
 			    addFragments(emCall);
+			    
+			    //FIXME
+			    //get victim`s details
+			    ActionBar ab = getActionBar();
+			    ab.setTitle("Nome da vítima");
+			    
 				//Veículo deve atender chamada -> Chama serviço para acknowledgment
 				ackEmergencyCall();
 			}
