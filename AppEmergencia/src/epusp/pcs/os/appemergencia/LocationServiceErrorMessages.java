@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-package com.pcsos.appemergencia;
+package epusp.pcs.os.appemergencia;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.pcsos.appemergencia.R;
+
 import android.content.Context;
 import android.content.res.Resources;
 

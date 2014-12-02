@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.pcsos.appemergencia;
+package epusp.pcs.os.appemergencia;
+
+import com.pcsos.appemergencia.R;
 
 import android.content.Context;
 import android.location.Location;

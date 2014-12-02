@@ -15,8 +15,8 @@
   limitations under the License.
 -->
 <resources>
-    <string name="app_name">AppEmergencia</string>
-    <string name="app_tag">LocationUpdates</string>
+    <string name="app_name">AppVitima</string>
+    <string name="app_tag">AppVitima</string>
     <string name="app_description">
         Displays current address and current or updated location using Location Services
     </string>
