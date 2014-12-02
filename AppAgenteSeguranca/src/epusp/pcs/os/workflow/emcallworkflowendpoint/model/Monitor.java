@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for Agent.
+ * Model definition for Monitor.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,7 +30,7 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class Agent extends com.google.api.client.json.GenericJson {
+public final class Monitor extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
@@ -54,25 +54,19 @@ public final class Agent extends com.google.api.client.json.GenericJson {
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<BooleanArrayAttribute> booleanArrayAttributes;
+  private java.lang.Boolean available;
 
-  static {
-    // hack to force ProGuard to consider BooleanArrayAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(BooleanArrayAttribute.class);
-  }
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key
+  private java.util.List<BooleanArrayAttribute> booleanArrayAttributes;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
   private java.util.List<BooleanAttribute> booleanAttributes;
-
-  static {
-    // hack to force ProGuard to consider BooleanAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(BooleanAttribute.class);
-  }
 
   /**
    * The value may be {@code null}.
@@ -92,18 +86,6 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   @com.google.api.client.util.Key
   private java.util.List<DateAttribute> dateAttributes;
 
-  static {
-    // hack to force ProGuard to consider DateAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(DateAttribute.class);
-  }
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private DrivingLicence drivingLicence;
-
   /**
    * The value may be {@code null}.
    */
@@ -116,23 +98,11 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   @com.google.api.client.util.Key
   private java.util.List<FloatArrayAttribute> floatArrayAttributes;
 
-  static {
-    // hack to force ProGuard to consider FloatArrayAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(FloatArrayAttribute.class);
-  }
-
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
   private java.util.List<FloatAttribute> floatAttributes;
-
-  static {
-    // hack to force ProGuard to consider FloatAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(FloatAttribute.class);
-  }
 
   /**
    * The value may be {@code null}.
@@ -152,41 +122,17 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   @com.google.api.client.util.Key
   private java.util.List<IntegerArrayAttribute> integerArrayAttributes;
 
-  static {
-    // hack to force ProGuard to consider IntegerArrayAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(IntegerArrayAttribute.class);
-  }
-
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
   private java.util.List<IntegerAttribute> integerAttributes;
 
-  static {
-    // hack to force ProGuard to consider IntegerAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(IntegerAttribute.class);
-  }
-
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
   private java.lang.Boolean isActive;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.util.List<Licence> licences;
-
-  static {
-    // hack to force ProGuard to consider Licence used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(Licence.class);
-  }
 
   /**
    * The value may be {@code null}.
@@ -216,13 +162,13 @@ public final class Agent extends com.google.api.client.json.GenericJson {
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<StringArrayAttribute> stringArrayAttributes;
+  private java.lang.Boolean status;
 
-  static {
-    // hack to force ProGuard to consider StringArrayAttribute used, since otherwise it would be stripped out
-    // see http://code.google.com/p/google-api-java-client/issues/detail?id=528
-    com.google.api.client.util.Data.nullOf(StringArrayAttribute.class);
-  }
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key
+  private java.util.List<StringArrayAttribute> stringArrayAttributes;
 
   /**
    * The value may be {@code null}.
@@ -252,7 +198,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param active active or {@code null} for none
    */
-  public Agent setActive(java.lang.Boolean active) {
+  public Monitor setActive(java.lang.Boolean active) {
     this.active = active;
     return this;
   }
@@ -267,7 +213,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param allAttributeKeys allAttributeKeys or {@code null} for none
    */
-  public Agent setAllAttributeKeys(java.util.List<java.lang.String> allAttributeKeys) {
+  public Monitor setAllAttributeKeys(java.util.List<java.lang.String> allAttributeKeys) {
     this.allAttributeKeys = allAttributeKeys;
     return this;
   }
@@ -282,8 +228,23 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param allAttributes allAttributes or {@code null} for none
    */
-  public Agent setAllAttributes(java.util.List<IAttribute> allAttributes) {
+  public Monitor setAllAttributes(java.util.List<IAttribute> allAttributes) {
     this.allAttributes = allAttributes;
+    return this;
+  }
+
+  /**
+   * @return value or {@code null} for none
+   */
+  public java.lang.Boolean getAvailable() {
+    return available;
+  }
+
+  /**
+   * @param available available or {@code null} for none
+   */
+  public Monitor setAvailable(java.lang.Boolean available) {
+    this.available = available;
     return this;
   }
 
@@ -297,7 +258,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param booleanArrayAttributes booleanArrayAttributes or {@code null} for none
    */
-  public Agent setBooleanArrayAttributes(java.util.List<BooleanArrayAttribute> booleanArrayAttributes) {
+  public Monitor setBooleanArrayAttributes(java.util.List<BooleanArrayAttribute> booleanArrayAttributes) {
     this.booleanArrayAttributes = booleanArrayAttributes;
     return this;
   }
@@ -312,7 +273,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param booleanAttributes booleanAttributes or {@code null} for none
    */
-  public Agent setBooleanAttributes(java.util.List<BooleanAttribute> booleanAttributes) {
+  public Monitor setBooleanAttributes(java.util.List<BooleanAttribute> booleanAttributes) {
     this.booleanAttributes = booleanAttributes;
     return this;
   }
@@ -327,7 +288,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param dateArrayAttributes dateArrayAttributes or {@code null} for none
    */
-  public Agent setDateArrayAttributes(java.util.List<DateArrayAttribute> dateArrayAttributes) {
+  public Monitor setDateArrayAttributes(java.util.List<DateArrayAttribute> dateArrayAttributes) {
     this.dateArrayAttributes = dateArrayAttributes;
     return this;
   }
@@ -342,23 +303,8 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param dateAttributes dateAttributes or {@code null} for none
    */
-  public Agent setDateAttributes(java.util.List<DateAttribute> dateAttributes) {
+  public Monitor setDateAttributes(java.util.List<DateAttribute> dateAttributes) {
     this.dateAttributes = dateAttributes;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public DrivingLicence getDrivingLicence() {
-    return drivingLicence;
-  }
-
-  /**
-   * @param drivingLicence drivingLicence or {@code null} for none
-   */
-  public Agent setDrivingLicence(DrivingLicence drivingLicence) {
-    this.drivingLicence = drivingLicence;
     return this;
   }
 
@@ -372,7 +318,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param email email or {@code null} for none
    */
-  public Agent setEmail(java.lang.String email) {
+  public Monitor setEmail(java.lang.String email) {
     this.email = email;
     return this;
   }
@@ -387,7 +333,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param floatArrayAttributes floatArrayAttributes or {@code null} for none
    */
-  public Agent setFloatArrayAttributes(java.util.List<FloatArrayAttribute> floatArrayAttributes) {
+  public Monitor setFloatArrayAttributes(java.util.List<FloatArrayAttribute> floatArrayAttributes) {
     this.floatArrayAttributes = floatArrayAttributes;
     return this;
   }
@@ -402,7 +348,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param floatAttributes floatAttributes or {@code null} for none
    */
-  public Agent setFloatAttributes(java.util.List<FloatAttribute> floatAttributes) {
+  public Monitor setFloatAttributes(java.util.List<FloatAttribute> floatAttributes) {
     this.floatAttributes = floatAttributes;
     return this;
   }
@@ -417,7 +363,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param googleUserId googleUserId or {@code null} for none
    */
-  public Agent setGoogleUserId(java.lang.String googleUserId) {
+  public Monitor setGoogleUserId(java.lang.String googleUserId) {
     this.googleUserId = googleUserId;
     return this;
   }
@@ -432,7 +378,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param id id or {@code null} for none
    */
-  public Agent setId(java.lang.String id) {
+  public Monitor setId(java.lang.String id) {
     this.id = id;
     return this;
   }
@@ -447,7 +393,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param integerArrayAttributes integerArrayAttributes or {@code null} for none
    */
-  public Agent setIntegerArrayAttributes(java.util.List<IntegerArrayAttribute> integerArrayAttributes) {
+  public Monitor setIntegerArrayAttributes(java.util.List<IntegerArrayAttribute> integerArrayAttributes) {
     this.integerArrayAttributes = integerArrayAttributes;
     return this;
   }
@@ -462,7 +408,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param integerAttributes integerAttributes or {@code null} for none
    */
-  public Agent setIntegerAttributes(java.util.List<IntegerAttribute> integerAttributes) {
+  public Monitor setIntegerAttributes(java.util.List<IntegerAttribute> integerAttributes) {
     this.integerAttributes = integerAttributes;
     return this;
   }
@@ -477,23 +423,8 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param isActive isActive or {@code null} for none
    */
-  public Agent setIsActive(java.lang.Boolean isActive) {
+  public Monitor setIsActive(java.lang.Boolean isActive) {
     this.isActive = isActive;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.util.List<Licence> getLicences() {
-    return licences;
-  }
-
-  /**
-   * @param licences licences or {@code null} for none
-   */
-  public Agent setLicences(java.util.List<Licence> licences) {
-    this.licences = licences;
     return this;
   }
 
@@ -507,7 +438,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param name name or {@code null} for none
    */
-  public Agent setName(java.lang.String name) {
+  public Monitor setName(java.lang.String name) {
     this.name = name;
     return this;
   }
@@ -522,7 +453,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param pictureURL pictureURL or {@code null} for none
    */
-  public Agent setPictureURL(java.lang.String pictureURL) {
+  public Monitor setPictureURL(java.lang.String pictureURL) {
     this.pictureURL = pictureURL;
     return this;
   }
@@ -537,7 +468,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param preferedLanguage preferedLanguage or {@code null} for none
    */
-  public Agent setPreferedLanguage(java.lang.String preferedLanguage) {
+  public Monitor setPreferedLanguage(java.lang.String preferedLanguage) {
     this.preferedLanguage = preferedLanguage;
     return this;
   }
@@ -552,8 +483,23 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param secondName secondName or {@code null} for none
    */
-  public Agent setSecondName(java.lang.String secondName) {
+  public Monitor setSecondName(java.lang.String secondName) {
     this.secondName = secondName;
+    return this;
+  }
+
+  /**
+   * @return value or {@code null} for none
+   */
+  public java.lang.Boolean getStatus() {
+    return status;
+  }
+
+  /**
+   * @param status status or {@code null} for none
+   */
+  public Monitor setStatus(java.lang.Boolean status) {
+    this.status = status;
     return this;
   }
 
@@ -567,7 +513,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param stringArrayAttributes stringArrayAttributes or {@code null} for none
    */
-  public Agent setStringArrayAttributes(java.util.List<StringArrayAttribute> stringArrayAttributes) {
+  public Monitor setStringArrayAttributes(java.util.List<StringArrayAttribute> stringArrayAttributes) {
     this.stringArrayAttributes = stringArrayAttributes;
     return this;
   }
@@ -582,7 +528,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param stringAttributes stringAttributes or {@code null} for none
    */
-  public Agent setStringAttributes(java.util.List<StringAttribute> stringAttributes) {
+  public Monitor setStringAttributes(java.util.List<StringAttribute> stringAttributes) {
     this.stringAttributes = stringAttributes;
     return this;
   }
@@ -597,7 +543,7 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param surname surname or {@code null} for none
    */
-  public Agent setSurname(java.lang.String surname) {
+  public Monitor setSurname(java.lang.String surname) {
     this.surname = surname;
     return this;
   }
@@ -612,19 +558,19 @@ public final class Agent extends com.google.api.client.json.GenericJson {
   /**
    * @param type type or {@code null} for none
    */
-  public Agent setType(java.lang.String type) {
+  public Monitor setType(java.lang.String type) {
     this.type = type;
     return this;
   }
 
   @Override
-  public Agent set(String fieldName, Object value) {
-    return (Agent) super.set(fieldName, value);
+  public Monitor set(String fieldName, Object value) {
+    return (Monitor) super.set(fieldName, value);
   }
 
   @Override
-  public Agent clone() {
-    return (Agent) super.clone();
+  public Monitor clone() {
+    return (Monitor) super.clone();
   }
 
 }

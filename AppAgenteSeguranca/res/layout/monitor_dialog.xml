@@ -7,22 +7,29 @@
         android:id="@+id/image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="5dp" />
- 
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#FFF" 
-        android:layout_toRightOf="@+id/image"/>/>
- 
-     <Button
-        android:id="@+id/dialogButtonOK"
-        android:layout_width="100px"
-        android:layout_height="wrap_content"
-        android:text=" Ok "
-        android:layout_marginTop="5dp"
         android:layout_marginRight="5dp"
-        android:layout_below="@+id/image"
-        />
+        android:src="@drawable/screenshot" />
+    
+    
+     <TextView
+         android:id="@+id/text"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_alignParentRight="true"
+         android:layout_alignParentTop="true"
+         android:layout_marginTop="24dp"
+         android:layout_toRightOf="@+id/image"
+         android:text="Detalhes"
+         android:textColor="#FFF" />
+    
+     <Button
+         android:id="@+id/dialogButtonOK"
+         android:layout_width="100px"
+         android:layout_height="wrap_content"
+         android:layout_alignBottom="@+id/image"
+         android:layout_alignParentRight="true"
+         android:layout_marginBottom="28dp"
+         android:text="OK" />
+
+
 </RelativeLayout>

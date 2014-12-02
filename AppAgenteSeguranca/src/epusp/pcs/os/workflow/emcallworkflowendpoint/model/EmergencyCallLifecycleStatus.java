@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for IAttribute.
+ * Model definition for EmergencyCallLifecycleStatus.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,79 +30,37 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class IAttribute extends com.google.api.client.json.GenericJson {
+public final class EmergencyCallLifecycleStatus extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String attributeName;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.String dataType;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.Object value;
+  private java.lang.String status;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getAttributeName() {
-    return attributeName;
+  public java.lang.String getStatus() {
+    return status;
   }
 
   /**
-   * @param attributeName attributeName or {@code null} for none
+   * @param status status or {@code null} for none
    */
-  public IAttribute setAttributeName(java.lang.String attributeName) {
-    this.attributeName = attributeName;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.lang.String getDataType() {
-    return dataType;
-  }
-
-  /**
-   * @param dataType dataType or {@code null} for none
-   */
-  public IAttribute setDataType(java.lang.String dataType) {
-    this.dataType = dataType;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.lang.Object getValue() {
-    return value;
-  }
-
-  /**
-   * @param value value or {@code null} for none
-   */
-  public IAttribute setValue(java.lang.Object value) {
-    this.value = value;
+  public EmergencyCallLifecycleStatus setStatus(java.lang.String status) {
+    this.status = status;
     return this;
   }
 
   @Override
-  public IAttribute set(String fieldName, Object value) {
-    return (IAttribute) super.set(fieldName, value);
+  public EmergencyCallLifecycleStatus set(String fieldName, Object value) {
+    return (EmergencyCallLifecycleStatus) super.set(fieldName, value);
   }
 
   @Override
-  public IAttribute clone() {
-    return (IAttribute) super.clone();
+  public EmergencyCallLifecycleStatus clone() {
+    return (EmergencyCallLifecycleStatus) super.clone();
   }
 
 }

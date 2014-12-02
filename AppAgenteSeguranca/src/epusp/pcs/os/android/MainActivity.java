@@ -10,10 +10,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -80,6 +82,11 @@ GooglePlayServicesClient.OnConnectionFailedListener {
      *
      */
     boolean mUpdatesRequested = false;
+    
+    EmergencyCall emCall = null;
+    //Monitor monitor = null;
+    //Victim victim = null;
+    
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -151,21 +158,23 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		// custom dialog
 		final Dialog dialog = new Dialog(this);
 		dialog.setContentView(R.layout.monitor_dialog);
-		dialog.setTitle("Monitor information");
- 
-		// set the custom dialog components - text, image and button
-		TextView text = (TextView) dialog.findViewById(R.id.text);
-		text.setText("Monitor details");
-		ImageView image = (ImageView) dialog.findViewById(R.id.image);
-		image.setImageResource(R.drawable.ic_launcher);
+		dialog.setTitle("Informações do Monitor");
+		
+		if(emCall != null) {
+			// set the custom dialog components - text, image and button
+			//TextView text = (TextView) dialog.findViewById(R.id.text);
+			//text.setText(emCall.getMonitor());
+			ImageView image = (ImageView) dialog.findViewById(R.id.image);
+			//image.setImageResource(R.drawable.ic_launcher);
 		Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
-		// if button is clicked, close the custom dialog
-		dialogButton.setOnClickListener(new OnClickListener() {
-			public void onClick(View v) {
-				dialog.dismiss();
-			}
-		});
-		dialog.show();
+			// if button is clicked, close the custom dialog
+			dialogButton.setOnClickListener(new OnClickListener() {
+				public void onClick(View v) {
+					dialog.dismiss();
+				}
+			});
+			dialog.show();
+		}
 	}
 	
 	/******************************************************************/
@@ -374,7 +383,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			myPosition.setLongitude(currentLocation.getLongitude());
 			//position.setLatitude(33.80653802509606);//currentLocation.getLatitude());
 			//position.setLongitude(-84.15252685546875);//currentLocation.getLongitude());
-	
+			
+			//FIXME
 			new updatePositionAndVerifyStatus(this, "TAG001", myPosition).execute();
         }
 	}
@@ -426,7 +436,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			super.onPreExecute();
 			pd = new ProgressDialog(context);
 			pd.setMessage("Updating...");
-			pd.show();    
+			//pd.show();    
 		}
 
 		protected EmergencyCall doInBackground(Void... params) {
@@ -443,22 +453,25 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			return response;
 		}
 
-		protected void onPostExecute(EmergencyCall emCall) {
+		protected void onPostExecute(EmergencyCall emergencyCall) {
 			//Clear the progress dialog and the fields
 			pd.dismiss();
-			if(emCall != null) {			    
+			if(emergencyCall != null) {
+				emCall = emergencyCall;
 			    addFragments(emCall);
 			    
 			    //FIXME
 			    //get victim`s details
 			    ActionBar ab = getActionBar();
-			    ab.setTitle("Nome da vítima");
+			    ab.setTitle(Html.fromHtml("<font color='#ffffff'>Nome da Vítima</font>"));
+			    ab.setBackgroundDrawable(new ColorDrawable(0xffff0000));
 			    
 				//Veículo deve atender chamada -> Chama serviço para acknowledgment
 				ackEmergencyCall();
 			}
 			//Display success message to user
-			Toast.makeText(getBaseContext(), "Update position/verify status succesfully", Toast.LENGTH_SHORT).show();
+			Toast.makeText(getBaseContext(), "A chamada foi finalizada!", Toast.LENGTH_SHORT).show();
+			//Toast.makeText(getBaseContext(), "Update position/verify status succesfully", Toast.LENGTH_SHORT).show();
 		}
 
 	}

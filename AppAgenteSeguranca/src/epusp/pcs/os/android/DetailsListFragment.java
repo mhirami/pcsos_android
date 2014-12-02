@@ -21,15 +21,15 @@ public class DetailsListFragment extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_details_list,
 				container, false);
 		TextView textView = (TextView) view.findViewById(R.id.detailsText);
-		textView.setText(text);
-		Button button = (Button) view.findViewById(R.id.button1);
-		button.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-
-				listener.onUpdate("A1");
-			}
-		});
+		//textView.setText(text);
+		//Button button = (Button) view.findViewById(R.id.button1);
+//		button.setOnClickListener(new View.OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//
+//				listener.onUpdate("A1");
+//			}
+//		});
 		return view;
 	}
 
