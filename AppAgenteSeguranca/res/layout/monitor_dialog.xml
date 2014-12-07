@@ -19,8 +19,7 @@
          android:layout_alignParentTop="true"
          android:layout_marginTop="24dp"
          android:layout_toRightOf="@+id/image"
-         android:text="Detalhes"
-         android:textColor="#FFF" />
+         android:textColor="#000000" />
     
      <Button
          android:id="@+id/dialogButtonOK"

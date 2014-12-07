@@ -67,6 +67,9 @@ ConnectionCallbacks, OnConnectionFailedListener {
 	private ImageView imgProfilePic;
 	private TextView txtName, txtEmail;
 	private LinearLayout llProfileLayout;
+	
+	AgentCollection agents = new AgentCollection();
+	ArrayList<Agent> agentsList = new ArrayList<Agent>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -163,11 +166,13 @@ ConnectionCallbacks, OnConnectionFailedListener {
 	public void onConnected(Bundle arg0) {
 		mSignInClicked = false;
 		Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
+		Agent newAgent = new Agent();
+		//newAgent.setEmail(email);
+		//newAgent.setGoogleUserId(googleUserId);
+		agentsList.add(newAgent);
+		agents.setAgentCollection(agentsList);
 		
-		AgentCollection agents = new AgentCollection();
-		agents.setAgentCollection(new ArrayList<Agent>());
-		
-		new addFreeVehicleAsyncTask(this, "PCS-0505", agents).execute();
+		//new addFreeVehicleAsyncTask(this, "PCS-0505", agents).execute();
 
 		// Get user's information
 		getProfileInformation();
@@ -316,6 +321,9 @@ ConnectionCallbacks, OnConnectionFailedListener {
 	private void gotoMainActivity() {
 		Log.e(TAG, "Opening Main Activity!");
 		Intent intent = new Intent(this, MainActivity.class);
+		Bundle b = new Bundle();
+		b.putSerializable("Agents", agentsList);
+		intent.putExtras(b);
         startActivity(intent);
 	}
 
@@ -347,42 +355,4 @@ ConnectionCallbacks, OnConnectionFailedListener {
 		}
 	}
 	
-	private class addFreeVehicleAsyncTask extends AsyncTask<Void, Void, Void>{
-		Context context;
-		private ProgressDialog pd;
-		String vehicleId;
-		AgentCollection agents;
-
-		public addFreeVehicleAsyncTask(Context context, String vehicleId, AgentCollection agents) {
-			this.context = context;
-			this.vehicleId = vehicleId;
-			this.agents = agents;
-		}
-
-		protected void onPreExecute(){ 
-			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Adding free vehicle...");
-			pd.show();    
-		}
-
-		protected Void doInBackground(Void... params) {
-			try {
-				Emcallworkflowendpoint.Builder builder = new Emcallworkflowendpoint.Builder(AndroidHttp.newCompatibleTransport(), new GsonFactory(), null);
-				Emcallworkflowendpoint service =  builder.build();
-				service.addFreeVehicle(vehicleId, agents).execute();
-			} catch (Exception e) {
-				Log.d("Could not add free vehicle", e.getMessage(), e);
-			}
-			return null;
-		}
-
-		protected void onPostExecute() {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
-			//Display success message to user
-			Toast.makeText(getBaseContext(), "Free vehicle added succesfully", Toast.LENGTH_SHORT).show();
-		}
-	}
 }

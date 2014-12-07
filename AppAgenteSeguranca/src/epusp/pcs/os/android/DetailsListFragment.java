@@ -14,13 +14,14 @@ public class DetailsListFragment extends Fragment {
 
 	private OnUpdateListener listener;
 	String text;
-
+	TextView textView;
+	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_details_list,
 				container, false);
-		TextView textView = (TextView) view.findViewById(R.id.detailsText);
+		textView = (TextView) view.findViewById(R.id.detailsText);
 		//textView.setText(text);
 		//Button button = (Button) view.findViewById(R.id.button1);
 //		button.setOnClickListener(new View.OnClickListener() {
@@ -36,12 +37,12 @@ public class DetailsListFragment extends Fragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		if (activity instanceof OnUpdateListener) {
-			listener = (OnUpdateListener) activity;
-		} else {
-			throw new ClassCastException(activity.toString()
-					+ " must implemenet DetailsListFragment.OnUpdateListener");
-		}
+//		if (activity instanceof OnUpdateListener) {
+//			listener = (OnUpdateListener) activity;
+//		} else {
+//			throw new ClassCastException(activity.toString()
+//					+ " must implemenet DetailsListFragment.OnUpdateListener");
+//		}
 	}
 
 	public interface OnUpdateListener {
@@ -49,10 +50,8 @@ public class DetailsListFragment extends Fragment {
 	}
 
 	// May also be triggered from the Activity
-	public void updateDetail(EmergencyCall emCall) {
-		String position = emCall.getLastVictimPosition().getLatitude().toString();
-		//textView.setText(position);
-
+	public void updateDetails() {
+		textView.setText(text);
 	}
 
 }
