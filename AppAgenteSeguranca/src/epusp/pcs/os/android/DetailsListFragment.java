@@ -1,57 +1,50 @@
 package epusp.pcs.os.android;
 
-import android.app.Activity;
+import java.util.ArrayList;
+
 import android.app.Fragment;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
-import epusp.pcs.os.workflow.emcallworkflowendpoint.model.EmergencyCall;
+import android.widget.ImageView;
+import android.widget.ListView;
 
 public class DetailsListFragment extends Fragment {
+	ImageView imageView;
+	ListView listView;
 
-	private OnUpdateListener listener;
-	String text;
-	TextView textView;
-	
+	DetailsListAdapter adapter;
+	ArrayList<Item> list;
+	String[] labels = new String[]{};
+	String[] values = new String[]{};
+
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.fragment_details_list,
 				container, false);
-		textView = (TextView) view.findViewById(R.id.detailsText);
-		//textView.setText(text);
-		//Button button = (Button) view.findViewById(R.id.button1);
-//		button.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//
-//				listener.onUpdate("A1");
-//			}
-//		});
+		listView = (ListView) view.findViewById(R.id.detailsList);
+		imageView = (ImageView) view.findViewById(R.id.image);
+		
+        list = new ArrayList<Item>();
+		for (int i = 0; i < labels.length; ++i) {
+			list.add(new Item(labels[i], values[i]));
+		}
+		adapter = new DetailsListAdapter(getActivity().getApplicationContext(), list);
+		listView.setAdapter(adapter);
 		return view;
 	}
-
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-//		if (activity instanceof OnUpdateListener) {
-//			listener = (OnUpdateListener) activity;
-//		} else {
-//			throw new ClassCastException(activity.toString()
-//					+ " must implemenet DetailsListFragment.OnUpdateListener");
-//		}
+	
+	//Atualiza dados na lista
+	public void updateDetails(ArrayList<Item> list) {
+		adapter.updateList(list); 
 	}
-
-	public interface OnUpdateListener {
-		public void onUpdate(String vehicleId);
-	}
-
-	// May also be triggered from the Activity
-	public void updateDetails() {
-		textView.setText(text);
+	
+	//Atualiza foto da vítima
+	public void updatePicture(Bitmap image) {
+		imageView.setImageBitmap(image);
 	}
 
 }

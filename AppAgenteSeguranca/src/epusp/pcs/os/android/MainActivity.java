@@ -1,5 +1,8 @@
 package epusp.pcs.os.android;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -9,11 +12,12 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -31,6 +35,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,11 +75,14 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private static final String MAP_FRAGMENT_TAG = "MAP";
 	private static final String DETAILSLIST_FRAGMENT_TAG = "DETAILSLIST";
+	private static final String APP_TAG = "PCSOS-MainActivity";
 
 	FrameLayout detailsFrameLayout;
-	//RelativeLayout mapFrameLayout;
+	RelativeLayout mapFrameLayout;
 	MapFragment mapFragment;
 	TextView busyRibbonTv;
+	
+	Bitmap monitorPicture = null;
 
 	DetailsListFragment detailsListFragment = new DetailsListFragment();
 
@@ -81,7 +90,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private LocationRequest mLocationRequest;
 	private LocationClient mLocationClient;
-	private Location mCurrentLocation;
 	// Handle to SharedPreferences for this app
 	SharedPreferences mPrefs;
 	// Handle to a SharedPreferences editor
@@ -115,7 +123,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		detailsFrameLayout = (FrameLayout)findViewById(R.id.detailsListContainer);
-		//mapFrameLayout = (FrameLayout)findViewById(R.id.mapContainer);
+		mapFrameLayout = (RelativeLayout)findViewById(R.id.mapContainer);
 		mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 		busyRibbonTv = (TextView)findViewById(R.id.busyRibbonTv);
 
@@ -204,10 +212,9 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		switch(estado) {
 		case livre:
-			//Atualizando fragments
-			detailsLayoutParams = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, 0);  
-			detailsFrameLayout.setLayoutParams(detailsLayoutParams); 
+			//Atualizando fragments 
 			detailsFrameLayout.setVisibility(View.GONE);
+
 
 			//			mapLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1);  
 			//			mapFrameLayout.setLayoutParams(mapLayoutParams); 
@@ -219,13 +226,9 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			fragmentTransaction.remove(detailsListFragment);
 			fragmentTransaction.commit();
 
-			//Atualizando mapa
-//			if (mapFragment != null) {
-//				googleMap = mapFragment.getMap();
-//				//googleMap.addMarker(new MarkerOptions().position(victimPosition).title("Vítima"));
-//			}
-
-			//Atualizando action bar
+			mapMarkers.remove("Victim");
+			updateMapAndCamera();
+			
 			aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + getResources().getString(R.string.app_name) + "</font>"));
 			aBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.background_color)));
 			turnFreeItem.setVisible(false);
@@ -245,11 +248,11 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			fragmentTransaction = fragmentManager.beginTransaction();
 			fragmentTransaction.remove(detailsListFragment);
 			fragmentTransaction.commit();
-			
-//			if (mapFragment != null) {
-//				googleMap = mapFragment.getMap();
-//				//googleMap.addMarker(new MarkerOptions().position(victimPosition).title("Vítima"));
-//			}
+
+			//			if (mapFragment != null) {
+			//				googleMap = mapFragment.getMap();
+			//				//googleMap.addMarker(new MarkerOptions().position(victimPosition).title("Vítima"));
+			//			}
 
 			aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + getResources().getString(R.string.app_name) + "</font>"));
 			aBar.setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.background_color)));
@@ -260,13 +263,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		case atendimento:
 			//Atualizando fragments
 			if(currentEmCall != null) {
-				detailsLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0.7f);  
-				detailsFrameLayout.setLayoutParams(detailsLayoutParams); 
+				//mapLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0.3f);
+				mapFrameLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 2f));
+				detailsFrameLayout.setLayoutParams(new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1f));
 				detailsFrameLayout.setVisibility(View.VISIBLE);
-
-				//				mapLayoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 0.3f);  
-				//				mapFrameLayout.setLayoutParams(mapLayoutParams); 
-				//				mapFrameLayout.setVisibility(View.VISIBLE);
+				//mapFrameLayout.setLayoutParams(mapLayoutParams); 
+				//mapFrameLayout.setVisibility(View.VISIBLE);
 
 				busyRibbonTv.setVisibility(View.GONE);
 
@@ -277,17 +279,17 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				LatLng victimPosition = new LatLng(currentEmCall.getLastVictimPosition().getLatitude(), currentEmCall.getLastVictimPosition().getLongitude());
 
 				//Atualizando mapa
-				mapMarkers.put("Vítima", victimPosition);
-				updateMap();
-//				if (mapFragment != null) {
-//					googleMap = mapFragment.getMap();
-//					googleMap.addMarker(new MarkerOptions().position(victimPosition).title("Vítima"));
-//				}
+				mapMarkers.put("Victim", victimPosition);
+				updateMapAndCamera();
 			}
 
 			//Atualizando action bar			
-			if(currentVictim != null)
-				aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + currentVictim.getName() + "</font>"));
+			if(currentVictim != null) {
+				String name = currentVictim.getName();
+				name += currentVictim.getSecondName() != null ? " " + currentVictim.getSecondName() : " ";
+				name += currentVictim.getSurname() != null ? " " + currentVictim.getSurname() : " ";
+				aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + name + "</font>"));
+			}
 			else
 				aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + getResources().getString(R.string.app_name) + "</font>"));
 			aBar.setBackgroundDrawable(new ColorDrawable(0xffff0000));
@@ -302,6 +304,18 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	}
 
 	private void updateMap() {
+		LatLngBounds.Builder builder = new LatLngBounds.Builder();
+		if (mapFragment != null) {
+			GoogleMap map = mapFragment.getMap();
+			map.clear();
+			for (Entry<String, LatLng> entry : mapMarkers.entrySet()) {                                                           
+				map.addMarker(new MarkerOptions().position(entry.getValue()));
+				builder.include(entry.getValue());                                      
+			}
+		}
+	}
+
+	private void updateMapAndCamera() {
 		LatLngBounds.Builder builder = new LatLngBounds.Builder();
 		LatLngBounds bounds;
 		int padding = 100;
@@ -326,12 +340,25 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		if(currentMonitor != null) {
 			// set the custom dialog components - text, image and button
+			ImageView imageView = (ImageView) dialog.findViewById(R.id.image);
+			if(monitorPicture != null)
+				imageView.setImageBitmap(monitorPicture);
+			
+			ListView listView = (ListView) dialog.findViewById(R.id.monitorDetailsList);
+			
+			ArrayList<Item> arrayList = new ArrayList<Item>();
+			DetailsListAdapter adapter;
 			//TextView text = (TextView) dialog.findViewById(R.id.text);
-			//text.setText(emCall.getMonitor());
-			ImageView image = (ImageView) dialog.findViewById(R.id.image);
-			//image.setImageResource(R.drawable.ic_launcher);
-			TextView text = (TextView) dialog.findViewById(R.id.text);
-			text.setText("Nome: " + currentMonitor.getName() + " " + currentMonitor.getSecondName() + " " + currentMonitor.getSurname());
+			String name = currentMonitor.getName();
+			name += currentMonitor.getSecondName() != null ? " " + currentMonitor.getSecondName() : "";
+			name += currentMonitor.getSurname() != null ? " " + currentMonitor.getSurname() : "";
+
+			arrayList.add(new Item("Nome:", name));
+
+			adapter = new DetailsListAdapter(this, arrayList);
+
+			listView.setAdapter(adapter);
+			//text.setText("Nome: " + name);
 			Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
 			// if button is clicked, close the custom dialog
 			dialogButton.setOnClickListener(new OnClickListener() {
@@ -476,11 +503,11 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		if(mLocationClient != null){
 			// get location
-			mCurrentLocation = mLocationClient.getLastLocation();
+			Location currentLocation = mLocationClient.getLastLocation();
 			try{
-				// set TextView(s) 
-				mCurrentLocation.getLatitude();
-				//onUpdate("Veículo");
+				LatLng myPosition = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+				mapMarkers.put("myPosition", myPosition);
+				updateMapAndCamera();
 			}catch(NullPointerException npe){
 
 				Toast.makeText(this, "Failed to Connect", Toast.LENGTH_SHORT).show();
@@ -591,12 +618,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		Position position = new Position();
 		position.setLatitude(location.getLatitude());
 		position.setLongitude(location.getLongitude());
-		
+
 		LatLng myPosition = new LatLng(location.getLatitude(), location.getLongitude());
-		
+
 		mapMarkers.put("myPosition", myPosition);
 		updateMap();
-		
+
 		if(isOnCall) {
 			new UpdatePositionAndVerifyCallStatusAsyncTask(this, vehicleTag, position, currentEmCall.getVictimEmail()).execute();
 		}
@@ -639,9 +666,17 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	public void getVictimInfo() {
 		new GetVictimAsyncTask(this, currentEmCall.getVictimEmail()).execute();
 	}
+	
+	public void getVictimPicture() {
+		new LoadVictimPicture().execute(currentVictim.getPictureURL());
+	}
 
 	public void getMonitorInfo() {
 		new GetMonitorAsyncTask(this, currentEmCall.getMonitor()).execute();
+	}
+	
+	public void getMonitorPicture() {
+		new LoadMonitorPicture().execute(currentMonitor.getPictureURL());
 	}
 
 	public void finishCall() {
@@ -655,12 +690,63 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	public void turnBusy() {
 		new vehicleLeavingAsyncTask(this, vehicleTag).execute();
 	}
+	
+	//------------------------------------------------------------------------------------------------------------------------
+
+		private class LoadVictimPicture extends AsyncTask<String, String, Bitmap> {
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				Toast.makeText(MainActivity.this, "Loading Image ....", Toast.LENGTH_SHORT).show();
+			}
+			protected Bitmap doInBackground(String... args) {
+				Bitmap bitmap = null;
+				try {
+					bitmap = BitmapFactory.decodeStream((InputStream)new URL(args[0]).getContent());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return bitmap;
+			}
+			protected void onPostExecute(Bitmap image) {
+				if(image != null){
+					detailsListFragment.updatePicture(image);
+				} else {
+					Toast.makeText(MainActivity.this, "Image Does Not exist or Network Error", Toast.LENGTH_SHORT).show();
+				}
+			}
+		}
+		
+	//------------------------------------------------------------------------------------------------------------------------
+
+	private class LoadMonitorPicture extends AsyncTask<String, String, Bitmap> {
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			Toast.makeText(MainActivity.this, "Loading Image ....", Toast.LENGTH_SHORT).show();
+		}
+		protected Bitmap doInBackground(String... args) {
+			Bitmap bitmap = null;
+			try {
+				bitmap = BitmapFactory.decodeStream((InputStream)new URL(args[0]).getContent());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return bitmap;
+		}
+		protected void onPostExecute(Bitmap image) {
+			if(image != null){
+				monitorPicture = image;
+			} else {
+				Toast.makeText(MainActivity.this, "Image Does Not exist or Network Error", Toast.LENGTH_SHORT).show();
+			}
+		}
+	}
 
 	//------------------------------------------------------------------------------------------------------------------------
 
-	private class addFreeVehicleAsyncTask extends AsyncTask<Void, Void, Void>{
+	private class addFreeVehicleAsyncTask extends AsyncTask<Void, Void, Void> {
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 		AgentCollection agents;
 
@@ -672,9 +758,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Adding free vehicle...");
-			pd.show();    
+			Toast.makeText(getBaseContext(), "Adding free vehicle...", Toast.LENGTH_SHORT).show();
 		}
 
 		protected Void doInBackground(Void... params) {
@@ -687,21 +771,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			}
 			return null;
 		}
-
-		protected void onPostExecute() {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
-			//Display success message to user
-			Toast.makeText(getBaseContext(), "Free vehicle added succesfully", Toast.LENGTH_SHORT).show();
-		}
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------
 
-	private class vehicleLeavingAsyncTask extends AsyncTask<Void, Void, Void>{
+	private class vehicleLeavingAsyncTask extends AsyncTask<Void, Void, Void> {
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 
 		public vehicleLeavingAsyncTask(Context context, String vehicleId) {
@@ -710,10 +785,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		}
 
 		protected void onPreExecute(){ 
-			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Removing vehicle from resources list...");
-			pd.show();    
+			super.onPreExecute(); 
+			Toast.makeText(getBaseContext(), "Removing vehicle from resources list...", Toast.LENGTH_SHORT).show();
 		}
 
 		protected Void doInBackground(Void... params) {
@@ -726,21 +799,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			}
 			return null;
 		}
-
-		protected void onPostExecute() {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
-			//Display success message to user
-			Toast.makeText(getBaseContext(), "Vehicle turned to busy state succesfully", Toast.LENGTH_SHORT).show();
-		}
 	}
 
 	//------------------------------------------------------------------------------------------------------------------------
 
 	private class UpdatePositionAndVerifyStatusAsyncTask extends AsyncTask<Void, Void, EmergencyCall> {
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 		Position position;
 
@@ -752,9 +816,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Updating...");
-			//pd.show();    
 		}
 
 		protected EmergencyCall doInBackground(Void... params) {
@@ -773,7 +834,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPostExecute(EmergencyCall emergencyCall) {
 			//Clear the progress dialog and the fields
-			pd.dismiss();
 			if(emergencyCall != null) {
 				currentEmCall = emergencyCall;
 				isOnCall = true;
@@ -794,14 +854,9 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				//Pegar informações do monitor
 				getMonitorInfo();
 
-				//Veículo inicia a atualização de posição + verificação de status
-				//TODO
-
 				Toast.makeText(context, "A chamada foi iniciada!", Toast.LENGTH_SHORT).show();
 
 			}
-			//Display success message to user
-			//Toast.makeText(getBaseContext(), "Update position/verify status succesfully", Toast.LENGTH_SHORT).show();
 		}
 
 	}
@@ -810,7 +865,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private class AckVehicleOnCallAsyncTask extends AsyncTask<Void, Void, Void> {
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 
 		public AckVehicleOnCallAsyncTask(Context context, String vehicleId) {
@@ -821,9 +875,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		protected void onPreExecute(){ 
 			super.onPreExecute();
 			Toast.makeText(context, "Ack waiting call...", Toast.LENGTH_SHORT).show();
-			//			pd = new ProgressDialog(context);
-			//			pd.setMessage("Ack waiting call...");
-			//			pd.show();    
+			Log.d(APP_TAG, "Ack waiting call..."); 
 		}
 
 		protected Void doInBackground(Void... params) {
@@ -832,25 +884,16 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				Emcallworkflowendpoint service =  builder.build();
 				service.ackVehicleOnCall(vehicleId).execute();
 			} catch (Exception e) {
-				Log.d("Could not ack waiting call", e.getMessage(), e);
+				Log.d(APP_TAG, e.getMessage(), e);
 			}
 			return null;
 		}
-
-		//		protected void onPostExecute() {
-		//			//Clear the progress dialog and the fields
-		//			pd.dismiss();
-		//
-		//			//Display success message to user
-		//			Toast.makeText(getBaseContext(), "Ack waiting call succesfully", Toast.LENGTH_SHORT).show();
-		//		}
 
 	}
 	//--------------------------------------------------------------------------------------------------------------------------
 
 	private class UpdatePositionAndVerifyCallStatusAsyncTask extends AsyncTask<Void, Void, EmergencyCallLifecycleStatus>{
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 		Position position;
 		String victimEmail;
@@ -864,9 +907,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Updating...");
-			//pd.show();    
+			Log.i(APP_TAG, "Updating and verifying call status...");
 		}
 
 		protected EmergencyCallLifecycleStatus doInBackground(Void... params) {
@@ -878,15 +919,13 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				response = service.updatePositionAndVerifyCallStatus(vehicleId, victimEmail, position).execute();
 
 			} catch (Exception e) {
-				Log.d("Could not update position/verify status", e.getMessage(), e);
+				Log.i(APP_TAG, "Could not update position/verify status");
+				Log.d(APP_TAG, e.getMessage(), e);
 			}
 			return response;
 		}
 
 		protected void onPostExecute(EmergencyCallLifecycleStatus emergencyCallStatus) {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
 			String emCallStatus = emergencyCallStatus.getStatus();
 			if(emCallStatus != null) {
 				//A chamada foi finalizada
@@ -897,6 +936,9 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 					currentEmCall = null;
 					currentVictim = null;
 					currentMonitor = null;
+					monitorPicture = null;
+					
+					Log.i(APP_TAG, "Call finished");
 					Toast.makeText(context, "A chamada foi finalizada!", Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -906,9 +948,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	//--------------------------------------------------------------------------------------------------------------------------
 
-	private class GetVictimAsyncTask extends AsyncTask<Void, Void, Victim>{
+	private class GetVictimAsyncTask extends AsyncTask<Void, Void, Victim> {
 		Context context;
-		private ProgressDialog pd;
 		String victimEmail;
 
 		public GetVictimAsyncTask(Context context, String victimEmail) {
@@ -918,9 +959,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Getting victim info...");
-			//pd.show();    
+			Log.i(APP_TAG, "Getting victim info...");
 		}
 
 		protected Victim doInBackground(Void... params) {
@@ -938,19 +977,21 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		}
 
 		protected void onPostExecute(Victim victim) {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
+			ActionBar aBar = getActionBar();
 			if(victim != null) {
 				//Conseguiu pegar as informações da vítima
 				currentVictim = victim;
+				getVictimPicture();
 				//Atualizando fragment com infos da vítima
 				if (detailsListFragment != null) {
-					detailsListFragment.text = currentVictim.getName();
-					detailsListFragment.updateDetails();
+					String name = currentVictim.getName();
+					name += currentVictim.getSecondName() != null ? " " + currentVictim.getSecondName() : "";
+					name += currentVictim.getSurname() != null ? " " + currentVictim.getSurname() : "";
+					aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + name + "</font>"));
+					ArrayList<Item> list = new ArrayList<Item>();
+					list.add(new Item("Nome:", name));
+					detailsListFragment.updateDetails(list);
 				}
-
-
 			}
 			else {
 				Toast.makeText(getBaseContext(), "Erro ao pegar as informações da vítima!", Toast.LENGTH_SHORT).show();
@@ -963,7 +1004,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private class GetMonitorAsyncTask extends AsyncTask<Void, Void, Monitor>{
 		Context context;
-		private ProgressDialog pd;
 		String monitorId;
 
 		public GetMonitorAsyncTask(Context context, String monitorId) {
@@ -973,9 +1013,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			pd = new ProgressDialog(context);
-			pd.setMessage("Getting monitor info...");
-			//pd.show();
+			Log.i(APP_TAG, "Getting monitor info...");
 		}
 
 		protected Monitor doInBackground(Void... params) {
@@ -993,12 +1031,10 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		}
 
 		protected void onPostExecute(Monitor monitor) {
-			//Clear the progress dialog and the fields
-			pd.dismiss();
-
 			if(monitor != null) {
 				//Conseguiu pegar as informações do monitor
 				currentMonitor = monitor;
+				getMonitorPicture();
 			}
 			else {
 				Toast.makeText(context, "Erro ao pegar as informações do monitor!", Toast.LENGTH_SHORT).show();
@@ -1011,7 +1047,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	private class AckVehicleFinishedCallAsyncTask extends AsyncTask<Void, Void, Void>{
 		Context context;
-		private ProgressDialog pd;
 		String vehicleId;
 
 		public AckVehicleFinishedCallAsyncTask(Context context, String vehicleId) {
@@ -1021,10 +1056,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		protected void onPreExecute(){ 
 			super.onPreExecute();
-			Toast.makeText(context, "Ack finished call...", Toast.LENGTH_SHORT).show();
-			//				pd = new ProgressDialog(context);
-			//				pd.setMessage("Ack waiting call...");
-			//				pd.show();    
+			Toast.makeText(context, "Ack finished call...", Toast.LENGTH_SHORT).show(); 
 		}
 
 		protected Void doInBackground(Void... params) {
@@ -1037,14 +1069,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			}
 			return null;
 		}
-
-		//			protected void onPostExecute() {
-		//				//Clear the progress dialog and the fields
-		//				pd.dismiss();
-		//
-		//				//Display success message to user
-		//				Toast.makeText(getBaseContext(), "Ack waiting call succesfully", Toast.LENGTH_SHORT).show();
-		//			}
 	}
 
 }

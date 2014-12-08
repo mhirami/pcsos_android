@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
 import android.graphics.Bitmap;
@@ -32,13 +30,9 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.json.gson.GsonFactory;
 
-import epusp.pcs.os.workflow.emcallworkflowendpoint.Emcallworkflowendpoint;
 import epusp.pcs.os.workflow.emcallworkflowendpoint.model.Agent;
 import epusp.pcs.os.workflow.emcallworkflowendpoint.model.AgentCollection;
-import epusp.pcs.os.workflow.emcallworkflowendpoint.model.Position;
 
 public class LoginActivity extends Activity implements OnClickListener,
 ConnectionCallbacks, OnConnectionFailedListener {

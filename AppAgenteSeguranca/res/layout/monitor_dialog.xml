@@ -1,34 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
- 
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
     <ImageView
         android:id="@+id/image"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_margin="15dp"
+        android:src="@drawable/screenshot" />
+
+    <ListView
+        android:id="@+id/monitorDetailsList"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginRight="5dp"
-        android:src="@drawable/screenshot" />
-    
-    
-     <TextView
-         android:id="@+id/text"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:layout_alignParentRight="true"
-         android:layout_alignParentTop="true"
-         android:layout_marginTop="24dp"
-         android:layout_toRightOf="@+id/image"
-         android:textColor="#000000" />
-    
-     <Button
-         android:id="@+id/dialogButtonOK"
-         android:layout_width="100px"
-         android:layout_height="wrap_content"
-         android:layout_alignBottom="@+id/image"
-         android:layout_alignParentRight="true"
-         android:layout_marginBottom="28dp"
-         android:text="OK" />
+        android:layout_alignBottom="@+id/image"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/image" >
+    </ListView>
 
+    <Button
+        android:id="@+id/dialogButtonOK"
+        android:layout_width="100px"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/monitorDetailsList"
+        android:text="OK" />
 
 </RelativeLayout>
