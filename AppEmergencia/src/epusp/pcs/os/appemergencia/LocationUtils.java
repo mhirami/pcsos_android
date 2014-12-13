@@ -16,10 +16,10 @@
 
 package epusp.pcs.os.appemergencia;
 
-import com.pcsos.appemergencia.R;
-
 import android.content.Context;
 import android.location.Location;
+
+import com.pcsos.appemergencia.R;
 
 
 /**
