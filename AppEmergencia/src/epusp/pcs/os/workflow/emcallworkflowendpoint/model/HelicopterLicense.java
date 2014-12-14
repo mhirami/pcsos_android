@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for VehicleOnCall.
+ * Model definition for HelicopterLicense.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,142 +30,121 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class VehicleOnCall extends com.google.api.client.json.GenericJson {
+public final class HelicopterLicense extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<java.lang.String> agents;
+  private java.lang.String category;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String id;
+  private java.lang.String licenceType;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private Position lastPosition;
+  private LicenseCategory licenseCategory;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<Position> positions;
+  private java.lang.String registerCode;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.Integer size;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.String vehicleIdTag;
+  private com.google.api.client.util.DateTime validUntil;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.util.List<java.lang.String> getAgents() {
-    return agents;
+  public java.lang.String getCategory() {
+    return category;
   }
 
   /**
-   * @param agents agents or {@code null} for none
+   * @param category category or {@code null} for none
    */
-  public VehicleOnCall setAgents(java.util.List<java.lang.String> agents) {
-    this.agents = agents;
+  public HelicopterLicense setCategory(java.lang.String category) {
+    this.category = category;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getId() {
-    return id;
+  public java.lang.String getLicenceType() {
+    return licenceType;
   }
 
   /**
-   * @param id id or {@code null} for none
+   * @param licenceType licenceType or {@code null} for none
    */
-  public VehicleOnCall setId(java.lang.String id) {
-    this.id = id;
+  public HelicopterLicense setLicenceType(java.lang.String licenceType) {
+    this.licenceType = licenceType;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public Position getLastPosition() {
-    return lastPosition;
+  public LicenseCategory getLicenseCategory() {
+    return licenseCategory;
   }
 
   /**
-   * @param lastPosition lastPosition or {@code null} for none
+   * @param licenseCategory licenseCategory or {@code null} for none
    */
-  public VehicleOnCall setLastPosition(Position lastPosition) {
-    this.lastPosition = lastPosition;
+  public HelicopterLicense setLicenseCategory(LicenseCategory licenseCategory) {
+    this.licenseCategory = licenseCategory;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.util.List<Position> getPositions() {
-    return positions;
+  public java.lang.String getRegisterCode() {
+    return registerCode;
   }
 
   /**
-   * @param positions positions or {@code null} for none
+   * @param registerCode registerCode or {@code null} for none
    */
-  public VehicleOnCall setPositions(java.util.List<Position> positions) {
-    this.positions = positions;
+  public HelicopterLicense setRegisterCode(java.lang.String registerCode) {
+    this.registerCode = registerCode;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Integer getSize() {
-    return size;
+  public com.google.api.client.util.DateTime getValidUntil() {
+    return validUntil;
   }
 
   /**
-   * @param size size or {@code null} for none
+   * @param validUntil validUntil or {@code null} for none
    */
-  public VehicleOnCall setSize(java.lang.Integer size) {
-    this.size = size;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.lang.String getVehicleIdTag() {
-    return vehicleIdTag;
-  }
-
-  /**
-   * @param vehicleIdTag vehicleIdTag or {@code null} for none
-   */
-  public VehicleOnCall setVehicleIdTag(java.lang.String vehicleIdTag) {
-    this.vehicleIdTag = vehicleIdTag;
+  public HelicopterLicense setValidUntil(com.google.api.client.util.DateTime validUntil) {
+    this.validUntil = validUntil;
     return this;
   }
 
   @Override
-  public VehicleOnCall set(String fieldName, Object value) {
-    return (VehicleOnCall) super.set(fieldName, value);
+  public HelicopterLicense set(String fieldName, Object value) {
+    return (HelicopterLicense) super.set(fieldName, value);
   }
 
   @Override
-  public VehicleOnCall clone() {
-    return (VehicleOnCall) super.clone();
+  public HelicopterLicense clone() {
+    return (HelicopterLicense) super.clone();
   }
 
 }

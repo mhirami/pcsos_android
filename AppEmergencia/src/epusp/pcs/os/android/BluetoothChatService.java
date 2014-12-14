@@ -209,6 +209,11 @@ public class BluetoothChatService {
         mHandler.sendMessage(msg);
 
         setState(STATE_CONNECTED);
+        
+        String message = "SYNC\n\r";
+        // Get the message bytes and tell the BluetoothChatService to write
+        byte[] send = message.getBytes();
+        write(send);
     }
 
     /**
