@@ -51,6 +51,7 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -117,6 +118,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 	//markMap is a hashmap populated with my markers positions.
 	HashMap<String, LatLng> mapMarkers = new HashMap<String, LatLng>();
+	String MY_POSITION_MARKER_TAG = "MyPosition";
+	String VICTIM_MARKER_TAG = "Victim";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,6 +140,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		Bundle extras = getIntent().getExtras();
 		List<Agent> agentsList = (List<Agent>) extras.getSerializable("Agents");
+		vehicleTag = (String) extras.getSerializable("VehicleTag");
 		agents = new AgentCollection();
 		agents.setAgentCollection(agentsList);
 
@@ -226,7 +230,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			fragmentTransaction.remove(detailsListFragment);
 			fragmentTransaction.commit();
 
-			mapMarkers.remove("Victim");
+			mapMarkers.remove(VICTIM_MARKER_TAG);
 			updateMapAndCamera();
 			
 			aBar.setTitle(Html.fromHtml("<font color='#ffffff'>" + getResources().getString(R.string.app_name) + "</font>"));
@@ -279,7 +283,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				LatLng victimPosition = new LatLng(currentEmCall.getLastVictimPosition().getLatitude(), currentEmCall.getLastVictimPosition().getLongitude());
 
 				//Atualizando mapa
-				mapMarkers.put("Victim", victimPosition);
+				mapMarkers.put(VICTIM_MARKER_TAG, victimPosition);
 				updateMapAndCamera();
 			}
 
@@ -309,7 +313,11 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			GoogleMap map = mapFragment.getMap();
 			map.clear();
 			for (Entry<String, LatLng> entry : mapMarkers.entrySet()) {                                                           
-				map.addMarker(new MarkerOptions().position(entry.getValue()));
+				if(entry.getKey().equals(MY_POSITION_MARKER_TAG))
+					map.addMarker(new MarkerOptions().position(entry.getValue()).icon(BitmapDescriptorFactory
+					        .defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+				else
+					map.addMarker(new MarkerOptions().position(entry.getValue()));
 				builder.include(entry.getValue());                                      
 			}
 		}
@@ -322,13 +330,28 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		if (mapFragment != null) {
 			GoogleMap map = mapFragment.getMap();
 			map.clear();
-			for (Entry<String, LatLng> entry : mapMarkers.entrySet()) {                                                           
-				map.addMarker(new MarkerOptions().position(entry.getValue()));
-				builder.include(entry.getValue());                                      
+			CameraUpdate update;
+			if(mapMarkers.size() == 1) {
+				CameraUpdate center = CameraUpdateFactory.newLatLng(mapMarkers.get(MY_POSITION_MARKER_TAG));
+				map.addMarker(new MarkerOptions().position(mapMarkers.get(MY_POSITION_MARKER_TAG)).icon(BitmapDescriptorFactory
+				        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+				update = CameraUpdateFactory.zoomTo(15);
+				map.moveCamera(center);
+				map.animateCamera(update);
 			}
-			bounds = builder.build();
-			CameraUpdate update = CameraUpdateFactory.newLatLngBounds(bounds, padding);
-			map.animateCamera(update);
+			else {
+				for (Entry<String, LatLng> entry : mapMarkers.entrySet()) {
+					if(entry.getKey().equals(MY_POSITION_MARKER_TAG))
+						map.addMarker(new MarkerOptions().position(entry.getValue()).icon(BitmapDescriptorFactory
+						        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+					else
+						map.addMarker(new MarkerOptions().position(entry.getValue()));
+					builder.include(entry.getValue());                                      
+				}
+				bounds = builder.build();
+				update = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+				map.animateCamera(update);
+			}
 		}
 	}
 
@@ -506,7 +529,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			Location currentLocation = mLocationClient.getLastLocation();
 			try{
 				LatLng myPosition = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-				mapMarkers.put("myPosition", myPosition);
+				mapMarkers.put(MY_POSITION_MARKER_TAG, myPosition);
 				updateMapAndCamera();
 			}catch(NullPointerException npe){
 
@@ -621,7 +644,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
 		LatLng myPosition = new LatLng(location.getLatitude(), location.getLongitude());
 
-		mapMarkers.put("myPosition", myPosition);
+		mapMarkers.put(MY_POSITION_MARKER_TAG, myPosition);
 		updateMap();
 
 		if(isOnCall) {

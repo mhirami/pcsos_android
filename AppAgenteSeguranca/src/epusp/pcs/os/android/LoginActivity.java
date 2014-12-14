@@ -4,20 +4,27 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender.SendIntentException;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -57,13 +64,22 @@ ConnectionCallbacks, OnConnectionFailedListener {
 	private ConnectionResult mConnectionResult;
 
 	private SignInButton btnSignIn;
-	private Button btnSignOut, btnRevokeAccess, btnGotoMain;
-	private ImageView imgProfilePic;
-	private TextView txtName, txtEmail;
+	private Button btnSignOut, btnRevokeAccess;
+	//private ImageView imgProfilePic;
+	//private TextView txtName, txtEmail;
 	private LinearLayout llProfileLayout;
-	
+
 	AgentCollection agents = new AgentCollection();
 	ArrayList<Agent> agentsList = new ArrayList<Agent>();
+	
+	String vehicleTag = "";
+
+	Menu menu;
+	ListView listView;
+	AgentsListAdapter adapter;
+
+	ArrayList<String> agentNames = new ArrayList<String>();
+	ArrayList<Integer> agentPictures = new ArrayList<Integer>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -73,17 +89,18 @@ ConnectionCallbacks, OnConnectionFailedListener {
 		btnSignIn = (SignInButton) findViewById(R.id.btn_sign_in);
 		btnSignOut = (Button) findViewById(R.id.btn_sign_out);
 		btnRevokeAccess = (Button) findViewById(R.id.btn_revoke_access);
-		btnGotoMain = (Button) findViewById(R.id.btn_goto_main);
-		imgProfilePic = (ImageView) findViewById(R.id.imgProfilePic);
-		txtName = (TextView) findViewById(R.id.txtName);
-		txtEmail = (TextView) findViewById(R.id.txtEmail);
+		//		imgProfilePic = (ImageView) findViewById(R.id.imgProfilePic);
+		//		txtName = (TextView) findViewById(R.id.txtName);
+		//		txtEmail = (TextView) findViewById(R.id.txtEmail);
 		llProfileLayout = (LinearLayout) findViewById(R.id.llProfile);
+
+		listView = (ListView) findViewById(R.id.agentsList);
+		adapter = new AgentsListAdapter(this, agentNames.toArray(new String[agentNames.size()]), agentPictures.toArray(new Integer[agentPictures.size()]));
 
 		// Button click listeners
 		btnSignIn.setOnClickListener(this);
 		btnSignOut.setOnClickListener(this);
 		btnRevokeAccess.setOnClickListener(this);
-		btnGotoMain.setOnClickListener(this);
 
 		mGoogleApiClient = new GoogleApiClient.Builder(this)
 		.addConnectionCallbacks(this)
@@ -159,14 +176,12 @@ ConnectionCallbacks, OnConnectionFailedListener {
 	@Override
 	public void onConnected(Bundle arg0) {
 		mSignInClicked = false;
-		Toast.makeText(this, "User is connected!", Toast.LENGTH_LONG).show();
+		Toast.makeText(this, "User is connected!", Toast.LENGTH_SHORT).show();
 		Agent newAgent = new Agent();
 		//newAgent.setEmail(email);
 		//newAgent.setGoogleUserId(googleUserId);
 		agentsList.add(newAgent);
 		agents.setAgentCollection(agentsList);
-		
-		//new addFreeVehicleAsyncTask(this, "PCS-0505", agents).execute();
 
 		// Get user's information
 		getProfileInformation();
@@ -183,13 +198,11 @@ ConnectionCallbacks, OnConnectionFailedListener {
 			btnSignIn.setVisibility(View.GONE);
 			btnSignOut.setVisibility(View.VISIBLE);
 			btnRevokeAccess.setVisibility(View.VISIBLE);
-			btnGotoMain.setVisibility(View.VISIBLE);
 			llProfileLayout.setVisibility(View.VISIBLE);
 		} else {
 			btnSignIn.setVisibility(View.VISIBLE);
 			btnSignOut.setVisibility(View.GONE);
 			btnRevokeAccess.setVisibility(View.GONE);
-			btnGotoMain.setVisibility(View.GONE);
 			llProfileLayout.setVisibility(View.GONE);
 		}
 	}
@@ -211,8 +224,8 @@ ConnectionCallbacks, OnConnectionFailedListener {
 						+ personGooglePlusProfile + ", email: " + email
 						+ ", Image: " + personPhotoUrl);
 
-				txtName.setText(personName);
-				txtEmail.setText(email);
+				//				txtName.setText(personName);
+				//				txtEmail.setText(email);
 
 				// by default the profile url gives 50x50 px image only
 				// we can replace the value with whatever dimension we want by
@@ -221,8 +234,11 @@ ConnectionCallbacks, OnConnectionFailedListener {
 						personPhotoUrl.length() - 2)
 						+ PROFILE_PIC_SIZE;
 
-				new LoadProfileImage(imgProfilePic).execute(personPhotoUrl);
+				agentNames.add(personName);
 
+				adapter.updateList(agentNames.toArray(new String[agentNames.size()]), agentPictures.toArray(new Integer[agentPictures.size()]));
+				int i = adapter.getIndex(personName);
+				new LoadProfileImage(i).execute(personPhotoUrl);
 			} else {
 				Toast.makeText(getApplicationContext(),
 						"Person information is null", Toast.LENGTH_LONG).show();
@@ -238,11 +254,82 @@ ConnectionCallbacks, OnConnectionFailedListener {
 		updateUI(false);
 	}
 
+	/*Menu*/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+		// Inflate the menu items for use in the action bar
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.config_actions, menu);
+		this.menu = menu;
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.action_go:
+			vehicleTag = getVehicleTagFromPreferences();
+			if(agentsList.size() > 0)
+				if(vehicleTag != null && !vehicleTag.isEmpty())
+					gotoMainActivity();
+				else
+					Toast.makeText(this, "Vehicle tag not configured!", Toast.LENGTH_SHORT).show();
+			else
+				Toast.makeText(this, "No user is logged!", Toast.LENGTH_SHORT).show();	
+			return true;
+		case R.id.action_config:
+			openConfigDialog();
+			return true;
+		case R.id.action_help:
+			return true;
+		case R.id.action_about:
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	public void openConfigDialog() {
+		// custom dialog
+		final Dialog dialog = new Dialog(this);
+		dialog.setContentView(R.layout.config_dialog);
+		dialog.setTitle("Configurações");
+
+		final EditText tag = (EditText) dialog.findViewById(R.id.tag);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		String storedTag = sharedPreferences.getString("VehicleTag", "");
+		tag.setText(storedTag);
+
+		Button dialogButton = (Button) dialog.findViewById(R.id.dialogButtonOK);
+		dialogButton.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				savePreferences("VehicleTag", tag.getText().toString());
+				dialog.dismiss();
+			}
+		});
+		
+		Button dialogButtonCancel = (Button) dialog.findViewById(R.id.dialogButtonCancel);
+		dialogButtonCancel.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+		
+		dialog.show();
+	}
+	
+	public void savePreferences(String key, String value) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		Editor editor = sharedPreferences.edit();
+		editor.putString(key, value);
+		editor.commit();
+	}
+	
+	public String getVehicleTagFromPreferences() {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+		return sharedPreferences.getString("VehicleTag", "");
 	}
 
 	/**
@@ -262,10 +349,6 @@ ConnectionCallbacks, OnConnectionFailedListener {
 		case R.id.btn_revoke_access:
 			// Revoke access button clicked
 			revokeGplusAccess();
-			break;
-		case R.id.btn_goto_main:
-			// Revoke access button clicked
-			gotoMainActivity();
 			break;
 		}
 	}
@@ -310,25 +393,26 @@ ConnectionCallbacks, OnConnectionFailedListener {
 			});
 		}
 	}
-	
+
 
 	private void gotoMainActivity() {
 		Log.e(TAG, "Opening Main Activity!");
 		Intent intent = new Intent(this, MainActivity.class);
 		Bundle b = new Bundle();
 		b.putSerializable("Agents", agentsList);
+		b.putSerializable("VehicleTag", vehicleTag);
 		intent.putExtras(b);
-        startActivity(intent);
+		startActivity(intent);
 	}
 
 	/**
 	 * Background Async task to load user profile picture from url
 	 * */
 	private class LoadProfileImage extends AsyncTask<String, Void, Bitmap> {
-		ImageView bmImage;
+		int index;
 
-		public LoadProfileImage(ImageView bmImage) {
-			this.bmImage = bmImage;
+		public LoadProfileImage(int index) {
+			this.index = index;
 		}
 
 		protected Bitmap doInBackground(String... urls) {
@@ -345,8 +429,18 @@ ConnectionCallbacks, OnConnectionFailedListener {
 		}
 
 		protected void onPostExecute(Bitmap result) {
-			bmImage.setImageBitmap(result);
+			updateView(this.index, result);
 		}
 	}
-	
+
+	private void updateView(int index, Bitmap img){
+		View v = listView.getChildAt(index - listView.getFirstVisiblePosition());
+
+		if(v == null)
+			return;
+
+		ImageView image = (ImageView) v.findViewById(R.id.image);
+		image.setImageBitmap(img);
+	}
+
 }
