@@ -1,6 +1,8 @@
 package epusp.pcs.os.appemergencia;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,8 +10,10 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 
@@ -54,6 +58,69 @@ public class BackgroundService extends Service implements LocationListener, Goog
 	 *
 	 */
 	boolean mUpdatesRequested = false;
+	
+	//----------------------------------------------------------------------------------------------------------------------
+	//BLUETOOTH
+	private static final int REQUEST_ENABLE_BT = 3;
+
+    /**
+     * Name of the connected device
+     */
+    private String mConnectedDeviceName = null;
+
+    /**
+     * Array adapter for the conversation thread
+     */
+    //private ArrayAdapter<String> mConversationArrayAdapter;
+
+    /**
+     * String buffer for outgoing messages
+     */
+    private StringBuffer mOutStringBuffer;
+
+    /**
+     * Local Bluetooth adapter
+     */
+    private BluetoothAdapter mBluetoothAdapter = null;
+
+    /**
+     * Member object for the chat services
+     */
+    private BluetoothChatService mChatService = null;
+    
+    //----------------------------------------------------
+    
+    private ByteQueue mByteQueue;
+    /**
+     * Used to temporarily hold data received from the remote process. Allocated
+     * once and used permanently to minimize heap thrashing.
+     */
+    private byte[] mReceiveBuffer;
+    
+    /**
+     * Our message handler class. Implements a periodic callback.
+     */
+    final Handler btHandler = new Handler() {
+        /**
+         * Handle the callback message. Call our enclosing class's update
+         * method.
+         *
+         * @param msg The callback message.
+         */
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+                update();
+            }
+        }
+    };
+    
+    final Runnable mCheckSize = new Runnable() {
+        public void run() {
+           // updateSize();
+            btHandler.postDelayed(this, 1000);
+        }
+    };	
 
 	//----------------------------------------------------------------------------------------------------------------------
 
@@ -79,14 +146,17 @@ public class BackgroundService extends Service implements LocationListener, Goog
 	@Override
 	public void onCreate() {
 		super.onCreate();
-
+		
 		Log.d("onCreate", SERVICE_TAG);
-
+		
+		//--------------------------------------------------------------------------------
+		//LOCATION
+		
 		// Create a new global location parameters object
 		mLocationRequest = LocationRequest.create();
 
 		//Set the update interval
-		mLocationRequest.setInterval(5000);
+		mLocationRequest.setInterval(30000);
 		//mLocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
 
 		// Use high accuracy
@@ -116,6 +186,44 @@ public class BackgroundService extends Service implements LocationListener, Goog
 		mLocationClient = new LocationClient(this, this, this);
 		
 		mLocationClient.connect();
+		
+		//----------------------------------------------------------------------
+		//Bluetooth
+		
+		// Get local Bluetooth adapter
+        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        mByteQueue = new ByteQueue(4 * 1024);
+        mReceiveBuffer = new byte[4 * 1024];
+
+        // If the adapter is null, then Bluetooth is not supported
+//        if (mBluetoothAdapter == null) {
+//            Activity activity = getActivity();
+//            Toast.makeText(activity, "Bluetooth is not available", Toast.LENGTH_LONG).show();
+//            activity.finish();
+//        }
+        
+     // If BT is not on, request that it be enabled.
+        // setupChat() will then be called during onActivityResult
+        if (!mBluetoothAdapter.isEnabled()) {
+            //Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+           //startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            // Otherwise, setup the chat session
+        } else if (mChatService == null) {
+            setupChat();
+        }
+        
+     // Performing this check in onResume() covers the case in which BT was
+        // not enabled during onStart(), so we were paused to enable it...
+        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
+        if (mChatService != null) {
+            // Only if the state is STATE_NONE, do we know that we haven't started already
+            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
+                // Start the Bluetooth chat services
+                mChatService.start();
+            }
+        }
+        btHandler.postDelayed(mCheckSize, 1000);
+		
 	}
 
 	/**
@@ -233,10 +341,13 @@ public class BackgroundService extends Service implements LocationListener, Goog
 			// Destroy the current location client
 			mLocationClient = null;
 		}
+		if (mChatService != null) {
+            mChatService.stop();
+        }
 		// Display the connection status
 		// Toast.makeText(this, DateFormat.getDateTimeInstance().format(new Date()) + ": Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
 		//appendLog(DateFormat.getDateTimeInstance().format(new Date()) + ": Stopped", Constants.LOG_FILE);
-		super.onDestroy();  
+		super.onDestroy();
 	}
 
 	/*
@@ -560,8 +671,13 @@ public class BackgroundService extends Service implements LocationListener, Goog
 				//TODO
 				Log.i("Você está sendo atendido!!", "UpdateVictimPositionAndVerifyStatusAsyncTask");
 				//Enviar sinal para o relógio avisando que a chamada já está sendo atendida
+				sendMessage("OK");
+				isNotified = true;
 			}
-			else if(emCallStatus.getStatus().equals("Finished")) {
+			else if(emCallStatus.getStatus().equals("Finished") && isNotified) {
+				Log.i("Chamada finalizada", "UpdateVictimPositionAndVerifyStatusAsyncTask");
+				needsAssistance = false;
+				isNotified = false;
 				//Parar de atualizar a posição
 				if (mLocationClient.isConnected()) {
 					stopPeriodicUpdates();
@@ -571,5 +687,275 @@ public class BackgroundService extends Service implements LocationListener, Goog
 	}
 
 	//---------------------------------------------------------------------------------------------------------------
+	//BLUETOOTH
+	public void write(byte[] buffer, int length) {
+        try {
+			mByteQueue.write(buffer, 0, length);
 
+            } catch (InterruptedException e) {
+        }
+        btHandler.sendMessage( btHandler.obtainMessage(1));
+    }
+    
+    /**
+     * Set up the UI and background operations for chat.
+     */
+    private void setupChat() {
+        Log.d(TAG, "setupChat()");
+
+        // Initialize the array adapter for the conversation thread
+        //mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
+
+        // Initialize the BluetoothChatService to perform bluetooth connections
+        mChatService = new BluetoothChatService(this, mHandler);
+
+        // Initialize the buffer for outgoing messages
+        mOutStringBuffer = new StringBuffer("");
+    }
+
+    /**
+     * Sends a message.
+     *
+     * @param message A string of text to send.
+     */
+    private void sendMessage(String message) {
+        // Check that we're actually connected before trying anything
+        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
+            //Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check that there's actually something to send
+        if (message.length() > 0) {
+        	message = message + "\n\r";
+            // Get the message bytes and tell the BluetoothChatService to write
+            byte[] send = message.getBytes();
+            mChatService.write(send);
+
+            // Reset out string buffer to zero and clear the edit text field
+            mOutStringBuffer.setLength(0);
+            //mOutEditText.setText(mOutStringBuffer);
+        }
+    }
+
+    /**
+     * Updates the status on the action bar.
+     *
+     * @param resId a string resource ID
+     */
+//    private void setStatus(int resId) {
+//        Activity activity = getActivity();
+//        if (null == activity) {
+//            return;
+//        }
+//        final ActionBar actionBar = activity.getActionBar();
+//        if (null == actionBar) {
+//            return;
+//        }
+//        actionBar.setSubtitle(resId);
+//    }
+
+    /**
+     * Updates the status on the action bar.
+     *
+     * @param subTitle status
+     */
+//    private void setStatus(CharSequence subTitle) {
+//        Activity activity = getActivity();
+//        if (null == activity) {
+//            return;
+//        }
+//        final ActionBar actionBar = activity.getActionBar();
+//        if (null == actionBar) {
+//            return;
+//        }
+//        actionBar.setSubtitle(subTitle);
+//    }
+
+    /**
+     * The Handler that gets information back from the BluetoothChatService
+     */
+    private final Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+           //Activity activity = getActivity();
+            switch (msg.what) {
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case BluetoothChatService.STATE_CONNECTED:
+                            //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                            //mConversationArrayAdapter.clear();
+                            break;
+                        case BluetoothChatService.STATE_CONNECTING:
+                            //setStatus(R.string.title_connecting);
+                            break;
+                        case BluetoothChatService.STATE_LISTEN:
+                        case BluetoothChatService.STATE_NONE:
+                            //setStatus(R.string.title_not_connected);
+                            break;
+                    }
+                    break;
+                case Constants.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // construct a string from the buffer
+                    String writeMessage = new String(writeBuf);
+                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    
+                    write(writeBuf, msg.arg1);
+                    break;
+                case Constants.MESSAGE_READ:
+                    byte[] readBuf = (byte[]) msg.obj;
+                    // construct a string from the valid bytes in the buffer
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    
+                    write(readBuf, msg.arg1);
+                    break;
+                case Constants.MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
+//                    if (null != activity) {
+//                        Toast.makeText(activity, "Connected to "
+//                                + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+//                    }
+                    break;
+                case Constants.MESSAGE_TOAST:
+//                    if (null != activity) {
+//                        Toast.makeText(activity, msg.getData().getString(Constants.TOAST),
+//                                Toast.LENGTH_SHORT).show();
+//                    }
+                    break;
+            }
+        }
+    };
+    
+    //-----------------------------------------------------------------------
+    
+    /**
+     * Look for new input from the ptty, send it to the terminal emulator.
+     */
+    private void update() {
+        int bytesAvailable = mByteQueue.getBytesAvailable();
+        int bytesToRead = Math.min(bytesAvailable, mReceiveBuffer.length);
+        try {
+            int bytesRead = mByteQueue.read(mReceiveBuffer, 0, bytesToRead);
+            String stringRead = new String(mReceiveBuffer, 0, bytesRead);
+            //append(mReceiveBuffer, 0, bytesRead);
+            
+            //FOI RECEBIDA UMA MENSAGEM DO DISPOSITIVO = INICIAR CHAMADA DE EMERGÊNCIA
+            //mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + stringRead);
+            if(!needsAssistance)
+            	startEmCall();         
+        } catch (InterruptedException e) {
+        }
+    }
+    
+    public void BTConnect(String address, boolean secure) {
+    	BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+    	mChatService.connect(device, secure);
+    }
+    
+    /**
+     * A multi-thread-safe produce-consumer byte array.
+     * Only allows one producer and one consumer.
+     */
+
+    class ByteQueue {
+        public ByteQueue(int size) {
+            mBuffer = new byte[size];
+        }
+
+        public int getBytesAvailable() {
+            synchronized(this) {
+                return mStoredBytes;
+            }
+        }
+
+        public int read(byte[] buffer, int offset, int length)
+            throws InterruptedException {
+            if (length + offset > buffer.length) {
+                throw
+                    new IllegalArgumentException("length + offset > buffer.length");
+            }
+            if (length < 0) {
+                throw
+                new IllegalArgumentException("length < 0");
+
+            }
+            if (length == 0) {
+                return 0;
+            }
+            synchronized(this) {
+                while (mStoredBytes == 0) {
+                    wait();
+                }
+                int totalRead = 0;
+                int bufferLength = mBuffer.length;
+                boolean wasFull = bufferLength == mStoredBytes;
+                while (length > 0 && mStoredBytes > 0) {
+                    int oneRun = Math.min(bufferLength - mHead, mStoredBytes);
+                    int bytesToCopy = Math.min(length, oneRun);
+                    System.arraycopy(mBuffer, mHead, buffer, offset, bytesToCopy);
+                    mHead += bytesToCopy;
+                    if (mHead >= bufferLength) {
+                        mHead = 0;
+                    }
+                    mStoredBytes -= bytesToCopy;
+                    length -= bytesToCopy;
+                    offset += bytesToCopy;
+                    totalRead += bytesToCopy;
+                }
+                if (wasFull) {
+                    notify();
+                }
+                return totalRead;
+            }
+        }
+
+        public void write(byte[] buffer, int offset, int length)
+        throws InterruptedException {
+            if (length + offset > buffer.length) {
+                throw
+                    new IllegalArgumentException("length + offset > buffer.length");
+            }
+            if (length < 0) {
+                throw
+                new IllegalArgumentException("length < 0");
+
+            }
+            if (length == 0) {
+                return;
+            }
+            synchronized(this) {
+                int bufferLength = mBuffer.length;
+                boolean wasEmpty = mStoredBytes == 0;
+                while (length > 0) {
+                    while(bufferLength == mStoredBytes) {
+                        wait();
+                    }
+                    int tail = mHead + mStoredBytes;
+                    int oneRun;
+                    if (tail >= bufferLength) {
+                        tail = tail - bufferLength;
+                        oneRun = mHead - tail;
+                    } else {
+                        oneRun = bufferLength - tail;
+                    }
+                    int bytesToCopy = Math.min(oneRun, length);
+                    System.arraycopy(buffer, offset, mBuffer, tail, bytesToCopy);
+                    offset += bytesToCopy;
+                    mStoredBytes += bytesToCopy;
+                    length -= bytesToCopy;
+                }
+                if (wasEmpty) {
+                    notify();
+                }
+            }
+        }
+
+        private byte[] mBuffer;
+        private int mHead;
+        private int mStoredBytes;
+    }
+	
 }

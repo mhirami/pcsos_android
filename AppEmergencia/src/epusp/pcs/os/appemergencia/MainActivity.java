@@ -69,9 +69,7 @@ public class MainActivity extends Activity {
 	 */
 	BackgroundService mService = null;
 	boolean mServiceConnected = false;
-
-	// Bluetooth enable request code
-	private final static int REQUEST_ENABLE_BT = 1;
+	
 	// Bluetoothe Adapter
 	private BluetoothAdapter mBluetoothAdapter;
 	private Set<BluetoothDevice> mPairedDevices;
@@ -82,6 +80,14 @@ public class MainActivity extends Activity {
 	ListView mPairedDevicesListView;
 	
 	FragmentManager fragmentManager = getFragmentManager();
+	
+	//------------------------------------------------------------------------------------
+	//BLUETOOTH
+    // Intent request codes
+    private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
+	//------------------------------------------------------------------------------------
 
 	/**
 	 * Class for interacting with the main interface of the service.
@@ -109,12 +115,12 @@ public class MainActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		if (savedInstanceState == null) {
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            BluetoothChatFragment fragment = new BluetoothChatFragment();
-            transaction.add(R.id.sample_content_fragment, fragment, "FRAGMENT");
-            transaction.commit();
-        }
+//		if (savedInstanceState == null) {
+//            FragmentTransaction transaction = fragmentManager.beginTransaction();
+//            BluetoothChatFragment fragment = new BluetoothChatFragment();
+//            transaction.add(R.id.sample_content_fragment, fragment, "FRAGMENT");
+//            transaction.commit();
+//        }
 	}
 
 	@Override
@@ -145,28 +151,111 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
+		getMenuInflater().inflate(R.menu.bluetooth_chat, menu);
 		return true;
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.search_devices:
-			find();
-			break;
-		case R.id.pair_device:
-			// Launch the DeviceListActivity to see devices and do scan
-//            Intent serverIntent = new Intent(this, DeviceListActivity.class);
-//            startActivityForResult(serverIntent, 2);
-            //return true;
-			listPairedDevices();
-			break;
-		default:
-            return super.onOptionsItemSelected(item);
-		}
-		return true;  
-	}
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		switch (item.getItemId()) {
+//		case R.id.search_devices:
+//			find();
+//			break;
+//		case R.id.pair_device:
+//			// Launch the DeviceListActivity to see devices and do scan
+////            Intent serverIntent = new Intent(this, DeviceListActivity.class);
+////            startActivityForResult(serverIntent, 2);
+//            //return true;
+//			listPairedDevices();
+//			break;
+//		default:
+//            return super.onOptionsItemSelected(item);
+//		}
+//		return true;  
+//	}
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.secure_connect_scan: {
+                // Launch the DeviceListActivity to see devices and do scan
+                Intent serverIntent = new Intent(this, DeviceListActivity.class);
+                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_SECURE);
+                return true;
+            }
+            case R.id.insecure_connect_scan: {
+                // Launch the DeviceListActivity to see devices and do scan
+                Intent serverIntent = new Intent(this, DeviceListActivity.class);
+                startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE_INSECURE);
+                return true;
+            }
+            case R.id.discoverable: {
+                // Ensure this device is discoverable by others
+                ensureDiscoverable();
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case REQUEST_CONNECT_DEVICE_SECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    connectDevice(data, true);
+                }
+                break;
+            case REQUEST_CONNECT_DEVICE_INSECURE:
+                // When DeviceListActivity returns with a device to connect
+                if (resultCode == Activity.RESULT_OK) {
+                    connectDevice(data, false);
+                }
+                break;
+//            case REQUEST_ENABLE_BT:
+//                // When the request to enable Bluetooth returns
+//                if (resultCode == Activity.RESULT_OK) {
+//                    // Bluetooth is now enabled, so set up a chat session
+//                    setupChat();
+//                } else {
+//                    // User did not enable Bluetooth or an error occurred
+//                    Log.d(TAG, "BT not enabled");
+//                    Toast.makeText(getActivity(), R.string.bt_not_enabled_leaving,
+//                            Toast.LENGTH_SHORT).show();
+//                    getActivity().finish();
+//                }
+        }
+    }
+    
+    /**
+     * Makes this device discoverable.
+     */
+    private void ensureDiscoverable() {
+        if (mBluetoothAdapter.getScanMode() !=
+                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
+            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+            startActivity(discoverableIntent);
+        }
+    }
+
+    /**
+     * Establish connection with other divice
+     *
+     * @param data   An {@link Intent} with {@link DeviceListActivity#EXTRA_DEVICE_ADDRESS} extra.
+     * @param secure Socket Security type - Secure (true) , Insecure (false)
+     */
+    private void connectDevice(Intent data, boolean secure) {
+        // Get the device MAC address
+        String address = data.getExtras()
+                .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        // Get the BluetoothDevice object
+        //BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
+        // Attempt to connect to the device
+        mService.BTConnect(address, secure);
+    }
+    
 
 	// Função chamada quando o usuário aperta o botão
 	public void help(View v) {
@@ -180,7 +269,7 @@ public class MainActivity extends Activity {
 		//		Intent intent = new Intent(this, BackgroundService.class);
 		//		ComponentName name = intent.getComponent();
 		//		name = startService(intent);
-		boolean bind = getApplicationContext().bindService(new Intent(this, BackgroundService.class), mConn, Context.BIND_AUTO_CREATE);
+		getApplicationContext().bindService(new Intent(this, BackgroundService.class), mConn, Context.BIND_AUTO_CREATE);
 
 	}
 

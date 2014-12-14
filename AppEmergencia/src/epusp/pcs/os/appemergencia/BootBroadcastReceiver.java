@@ -11,7 +11,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {   
         // BOOT_COMPLETED” start Service    
         if (intent.getAction().equals(ACTION)) {   
-        	android.os.Debug.waitForDebugger();
+        	//android.os.Debug.waitForDebugger();
             //Service
             Intent serviceIntent = new Intent(context, BackgroundService.class);
             context.startService(serviceIntent);
