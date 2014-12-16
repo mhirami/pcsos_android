@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for EmergencyCallLifecycleStatus.
+ * Model definition for JsonMap.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,37 +30,16 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class EmergencyCallLifecycleStatus extends com.google.api.client.json.GenericJson {
+public final class JsonMap extends com.google.api.client.json.GenericJson {
 
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.String status;
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.lang.String getStatus() {
-    return status;
-  }
-
-  /**
-   * @param status status or {@code null} for none
-   */
-  public EmergencyCallLifecycleStatus setStatus(java.lang.String status) {
-    this.status = status;
-    return this;
+  @Override
+  public JsonMap set(String fieldName, Object value) {
+    return (JsonMap) super.set(fieldName, value);
   }
 
   @Override
-  public EmergencyCallLifecycleStatus set(String fieldName, Object value) {
-    return (EmergencyCallLifecycleStatus) super.set(fieldName, value);
-  }
-
-  @Override
-  public EmergencyCallLifecycleStatus clone() {
-    return (EmergencyCallLifecycleStatus) super.clone();
+  public JsonMap clone() {
+    return (JsonMap) super.clone();
   }
 
 }

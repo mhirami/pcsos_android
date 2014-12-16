@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for VehicleOnCall.
+ * Model definition for DrivingLicense.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,142 +30,142 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class VehicleOnCall extends com.google.api.client.json.GenericJson {
+public final class DrivingLicense extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<java.lang.String> agents;
+  private java.lang.String category;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String id;
+  private java.lang.Boolean hasAcategory;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private Position lastPosition;
+  private java.lang.String licenceType;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.util.List<Position> positions;
+  private LicenseCategory licenseCategory;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.Integer size;
+  private java.lang.String registerCode;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String vehicleIdTag;
+  private com.google.api.client.util.DateTime validUntil;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.util.List<java.lang.String> getAgents() {
-    return agents;
+  public java.lang.String getCategory() {
+    return category;
   }
 
   /**
-   * @param agents agents or {@code null} for none
+   * @param category category or {@code null} for none
    */
-  public VehicleOnCall setAgents(java.util.List<java.lang.String> agents) {
-    this.agents = agents;
+  public DrivingLicense setCategory(java.lang.String category) {
+    this.category = category;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getId() {
-    return id;
+  public java.lang.Boolean getHasAcategory() {
+    return hasAcategory;
   }
 
   /**
-   * @param id id or {@code null} for none
+   * @param hasAcategory hasAcategory or {@code null} for none
    */
-  public VehicleOnCall setId(java.lang.String id) {
-    this.id = id;
+  public DrivingLicense setHasAcategory(java.lang.Boolean hasAcategory) {
+    this.hasAcategory = hasAcategory;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public Position getLastPosition() {
-    return lastPosition;
+  public java.lang.String getLicenceType() {
+    return licenceType;
   }
 
   /**
-   * @param lastPosition lastPosition or {@code null} for none
+   * @param licenceType licenceType or {@code null} for none
    */
-  public VehicleOnCall setLastPosition(Position lastPosition) {
-    this.lastPosition = lastPosition;
+  public DrivingLicense setLicenceType(java.lang.String licenceType) {
+    this.licenceType = licenceType;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.util.List<Position> getPositions() {
-    return positions;
+  public LicenseCategory getLicenseCategory() {
+    return licenseCategory;
   }
 
   /**
-   * @param positions positions or {@code null} for none
+   * @param licenseCategory licenseCategory or {@code null} for none
    */
-  public VehicleOnCall setPositions(java.util.List<Position> positions) {
-    this.positions = positions;
+  public DrivingLicense setLicenseCategory(LicenseCategory licenseCategory) {
+    this.licenseCategory = licenseCategory;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Integer getSize() {
-    return size;
+  public java.lang.String getRegisterCode() {
+    return registerCode;
   }
 
   /**
-   * @param size size or {@code null} for none
+   * @param registerCode registerCode or {@code null} for none
    */
-  public VehicleOnCall setSize(java.lang.Integer size) {
-    this.size = size;
+  public DrivingLicense setRegisterCode(java.lang.String registerCode) {
+    this.registerCode = registerCode;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getVehicleIdTag() {
-    return vehicleIdTag;
+  public com.google.api.client.util.DateTime getValidUntil() {
+    return validUntil;
   }
 
   /**
-   * @param vehicleIdTag vehicleIdTag or {@code null} for none
+   * @param validUntil validUntil or {@code null} for none
    */
-  public VehicleOnCall setVehicleIdTag(java.lang.String vehicleIdTag) {
-    this.vehicleIdTag = vehicleIdTag;
+  public DrivingLicense setValidUntil(com.google.api.client.util.DateTime validUntil) {
+    this.validUntil = validUntil;
     return this;
   }
 
   @Override
-  public VehicleOnCall set(String fieldName, Object value) {
-    return (VehicleOnCall) super.set(fieldName, value);
+  public DrivingLicense set(String fieldName, Object value) {
+    return (DrivingLicense) super.set(fieldName, value);
   }
 
   @Override
-  public VehicleOnCall clone() {
-    return (VehicleOnCall) super.clone();
+  public DrivingLicense clone() {
+    return (DrivingLicense) super.clone();
   }
 
 }

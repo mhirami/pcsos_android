@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for IAttribute.
+ * Model definition for License.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,79 +30,100 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class IAttribute extends com.google.api.client.json.GenericJson {
+public final class License extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String attributeName;
+  private java.lang.String licenceType;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String dataType;
+  private LicenseCategory licenseCategory;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.Object value;
+  private java.lang.String registerCode;
+
+  /**
+   * The value may be {@code null}.
+   */
+  @com.google.api.client.util.Key
+  private com.google.api.client.util.DateTime validUntil;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getAttributeName() {
-    return attributeName;
+  public java.lang.String getLicenceType() {
+    return licenceType;
   }
 
   /**
-   * @param attributeName attributeName or {@code null} for none
+   * @param licenceType licenceType or {@code null} for none
    */
-  public IAttribute setAttributeName(java.lang.String attributeName) {
-    this.attributeName = attributeName;
+  public License setLicenceType(java.lang.String licenceType) {
+    this.licenceType = licenceType;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getDataType() {
-    return dataType;
+  public LicenseCategory getLicenseCategory() {
+    return licenseCategory;
   }
 
   /**
-   * @param dataType dataType or {@code null} for none
+   * @param licenseCategory licenseCategory or {@code null} for none
    */
-  public IAttribute setDataType(java.lang.String dataType) {
-    this.dataType = dataType;
+  public License setLicenseCategory(LicenseCategory licenseCategory) {
+    this.licenseCategory = licenseCategory;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.Object getValue() {
-    return value;
+  public java.lang.String getRegisterCode() {
+    return registerCode;
   }
 
   /**
-   * @param value value or {@code null} for none
+   * @param registerCode registerCode or {@code null} for none
    */
-  public IAttribute setValue(java.lang.Object value) {
-    this.value = value;
+  public License setRegisterCode(java.lang.String registerCode) {
+    this.registerCode = registerCode;
+    return this;
+  }
+
+  /**
+   * @return value or {@code null} for none
+   */
+  public com.google.api.client.util.DateTime getValidUntil() {
+    return validUntil;
+  }
+
+  /**
+   * @param validUntil validUntil or {@code null} for none
+   */
+  public License setValidUntil(com.google.api.client.util.DateTime validUntil) {
+    this.validUntil = validUntil;
     return this;
   }
 
   @Override
-  public IAttribute set(String fieldName, Object value) {
-    return (IAttribute) super.set(fieldName, value);
+  public License set(String fieldName, Object value) {
+    return (License) super.set(fieldName, value);
   }
 
   @Override
-  public IAttribute clone() {
-    return (IAttribute) super.clone();
+  public License clone() {
+    return (License) super.clone();
   }
 
 }

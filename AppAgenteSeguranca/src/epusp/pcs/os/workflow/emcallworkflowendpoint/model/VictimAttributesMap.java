@@ -19,7 +19,7 @@
 package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
 
 /**
- * Model definition for IAttribute.
+ * Model definition for VictimAttributesMap.
  *
  * <p> This is the Java data model class that specifies how to parse/serialize into the JSON that is
  * transmitted over HTTP when working with the emcallworkflowendpoint. For a detailed explanation
@@ -30,79 +30,58 @@ package epusp.pcs.os.workflow.emcallworkflowendpoint.model;
  * @author Google, Inc.
  */
 @SuppressWarnings("javadoc")
-public final class IAttribute extends com.google.api.client.json.GenericJson {
+public final class VictimAttributesMap extends com.google.api.client.json.GenericJson {
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String attributeName;
+  private JsonMap primaryMap;
 
   /**
    * The value may be {@code null}.
    */
   @com.google.api.client.util.Key
-  private java.lang.String dataType;
-
-  /**
-   * The value may be {@code null}.
-   */
-  @com.google.api.client.util.Key
-  private java.lang.Object value;
+  private JsonMap secondaryMap;
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getAttributeName() {
-    return attributeName;
+  public JsonMap getPrimaryMap() {
+    return primaryMap;
   }
 
   /**
-   * @param attributeName attributeName or {@code null} for none
+   * @param primaryMap primaryMap or {@code null} for none
    */
-  public IAttribute setAttributeName(java.lang.String attributeName) {
-    this.attributeName = attributeName;
+  public VictimAttributesMap setPrimaryMap(JsonMap primaryMap) {
+    this.primaryMap = primaryMap;
     return this;
   }
 
   /**
    * @return value or {@code null} for none
    */
-  public java.lang.String getDataType() {
-    return dataType;
+  public JsonMap getSecondaryMap() {
+    return secondaryMap;
   }
 
   /**
-   * @param dataType dataType or {@code null} for none
+   * @param secondaryMap secondaryMap or {@code null} for none
    */
-  public IAttribute setDataType(java.lang.String dataType) {
-    this.dataType = dataType;
-    return this;
-  }
-
-  /**
-   * @return value or {@code null} for none
-   */
-  public java.lang.Object getValue() {
-    return value;
-  }
-
-  /**
-   * @param value value or {@code null} for none
-   */
-  public IAttribute setValue(java.lang.Object value) {
-    this.value = value;
+  public VictimAttributesMap setSecondaryMap(JsonMap secondaryMap) {
+    this.secondaryMap = secondaryMap;
     return this;
   }
 
   @Override
-  public IAttribute set(String fieldName, Object value) {
-    return (IAttribute) super.set(fieldName, value);
+  public VictimAttributesMap set(String fieldName, Object value) {
+    return (VictimAttributesMap) super.set(fieldName, value);
   }
 
   @Override
-  public IAttribute clone() {
-    return (IAttribute) super.clone();
+  public VictimAttributesMap clone() {
+    return (VictimAttributesMap) super.clone();
   }
 
 }
