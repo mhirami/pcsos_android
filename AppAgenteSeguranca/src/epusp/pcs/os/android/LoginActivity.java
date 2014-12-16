@@ -274,9 +274,9 @@ ConnectionCallbacks, OnConnectionFailedListener {
 				if(vehicleTag != null && !vehicleTag.isEmpty())
 					gotoMainActivity();
 				else
-					Toast.makeText(this, "Vehicle tag not configured!", Toast.LENGTH_SHORT).show();
+					Toast.makeText(this, "Não há uma tag de veículo configurada!", Toast.LENGTH_SHORT).show();
 			else
-				Toast.makeText(this, "No user is logged!", Toast.LENGTH_SHORT).show();	
+				Toast.makeText(this, "Nenhum usuário está logado!", Toast.LENGTH_SHORT).show();	
 			return true;
 		case R.id.action_config:
 			openConfigDialog();
