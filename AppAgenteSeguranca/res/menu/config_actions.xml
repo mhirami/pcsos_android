@@ -10,8 +10,10 @@
           android:showAsAction="never" />
     <item android:id="@+id/action_help"
           android:title="Ajuda"
-          android:showAsAction="never" />
+          android:showAsAction="never"
+          android:visible="false" />
     <item android:id="@+id/action_about"
           android:title="Sobre"
-          android:showAsAction="never" />
+          android:showAsAction="never"
+          android:visible="false" />
 </menu>

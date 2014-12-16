@@ -15,12 +15,28 @@
         android:orientation="horizontal"
         android:visibility="gone"
         android:weightSum="3" >
-        <ListView
+
+        <ListView
             android:id="@+id/agentsList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
         </ListView>
     </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp" >
+
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_margin="15dp"
+            android:src="@drawable/logo_black_back" />
+    </RelativeLayout>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/btn_sign_in"
@@ -34,14 +50,14 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
-        android:text="@string/btn_logout_from_google"
+        android:text="Logout"
         android:visibility="gone" />
 
     <Button
         android:id="@+id/btn_revoke_access"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_revoke_access"
+        android:text="Revogar permissão de acesso"
         android:visibility="gone" />
 
 </LinearLayout>

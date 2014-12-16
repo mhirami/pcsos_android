@@ -14,19 +14,20 @@
     <ListView
         android:id="@+id/monitorDetailsList"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/image"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:layout_height="100dp"
+        android:layout_alignRight="@+id/dialogButtonOK"
+        android:layout_alignTop="@+id/image"
         android:layout_toRightOf="@+id/image" >
+
     </ListView>
 
     <Button
         android:id="@+id/dialogButtonOK"
-        android:layout_width="100px"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/image"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/monitorDetailsList"
+        android:layout_marginRight="14dp"
         android:text="OK" />
 
 </RelativeLayout>
